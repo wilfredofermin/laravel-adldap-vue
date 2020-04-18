@@ -49,6 +49,8 @@ class CreateSolicitudsTable extends Migration
             // Usuario que lo medifico | Tomara el usuario quien lo abra despues de creado
             $table->string('modificado_por')->nullable();
 
+            $table->timestamps();
+
         });
     }
 

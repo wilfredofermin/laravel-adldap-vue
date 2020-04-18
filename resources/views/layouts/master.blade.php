@@ -127,15 +127,15 @@ Este proyecto ha sido creado para ser utilizado con fines interno a la empresa. 
                             <a href="#" class="nav-link active">
                                 <i class="nav-icon fas fa-users"></i>
                                 <p>
-                                    SERVICESKIT
+                                    SOLICITUDES
                                     <i class="right fas fa-angle-left"></i>
                                 </p>
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <router-link to="/nuevo-ingreso" class="nav-link">
+                                    <router-link to="/serviceskit" class="nav-link">
                                         <i class="fas fa-user-check nav-icon"></i>
-                                        <p>Nuevo Ingreso</p>
+                                        <p>Servicekit</p>
                                         </a>
                                     </router-link>
                                 </li>

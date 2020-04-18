@@ -15,7 +15,7 @@ class CreateLocalidadsTable extends Migration
     {
         Schema::create('localidads', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->boolean('stauts')->nullable()->default(true);
+            $table->boolean('activo')->nullable()->default(true);
             $table->string('nombre', 40);
             $table->string('direccion', 300)->nullable();
             $table->timestamps();

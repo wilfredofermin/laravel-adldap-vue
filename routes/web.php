@@ -27,4 +27,11 @@ Auth::routes([
 
 Route::get('/home', 'HomeController@index')->name('home');
 
+
+Route::get('/getSolicitudes', 'SolicitudController@getSolicitudes')->name('getSolicitudes');
+Route::get('/getDepartamentos', 'SolicitudController@getDepartamentos')->name('getDepartamentos');
+Route::get('/getPuestos', 'SolicitudController@getPuestos')->name('getPuestos');
+Route::get('/getLocalidad', 'SolicitudController@getLocalidad')->name('getLocalidad');
+
+// Vue-Router 
 Route::get('{path}', 'HomeController@index')->where( 'path' , '([A-z\d\-\/_.]+)?' );

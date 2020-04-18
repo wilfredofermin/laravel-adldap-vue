@@ -22,12 +22,8 @@ Vue.use(VueRouter);
 
 let routes = [
     {
-        path: "/nuevo-ingreso",
-        component: require("./components/Nuevo-Ingreso.vue").default
-    },
-    {
-        path: "/miembros",
-        component: require("./components/Miembros.vue").default
+        path: "/serviceskit",
+        component: require("./components/Serviceskit.vue").default
     }
 ];
 

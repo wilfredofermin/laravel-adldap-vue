@@ -15,7 +15,7 @@ class CreatePuestosTable extends Migration
     {
         Schema::create('puestos', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->boolean('stauts')->nullable()->default(true);
+            $table->boolean('activo')->nullable()->default(true);
             $table->string('nombre', 40);
             $table->string('descripcion', 300)->nullable();
 

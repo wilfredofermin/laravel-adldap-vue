@@ -15,7 +15,7 @@ class CreateDepartamentosTable extends Migration
     {
         Schema::create('departamentos', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->boolean('stauts')->nullable()->default(true);
+            $table->boolean('activo')->nullable()->default(true);
             $table->string('nombre',40);
             $table->timestamps();
         });

@@ -1,6 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\DB;
+use App\Solicitud;
+use App\Departamento;
+use App\Localidad;
 
 use Illuminate\Http\Request;
 
@@ -8,10 +12,10 @@ class SolicitudController extends Controller
 {
     //
 
- public function getIngresos(){
+ public function getSolicitudes(){
 
-       $ingresos=Nuevoingreso::latest()->get();
-        return response()->json($ingresos);
+       $getSolicitudes=Solicitud::latest()->get();
+        return response()->json($getSolicitudes);
    }
    
    public function getDepartamentos(){
