@@ -8,13 +8,31 @@ require("./bootstrap");
 
 window.Vue = require("vue");
 
-/**
- * The following block of code may be used to automatically register your
- * Vue components. It will recursively scan this directory for the Vue
- * components and automatically register them with their "basename".
- *
- * Eg. ./components/ExampleComponent.vue -> <example-component></example-component>
- */
+// FORMATEO DE CONTENIDOS -
+//  TEXTOS A CAPITALIZE -  REFERENCIA : https://vuejs.org/v2/guide/filters.html
+Vue.filter("capitalize", function(text) {
+    if (!text) return "";
+    text = text.toString();
+    return text.charAt(0).toUpperCase() + text.slice(1);
+});
+
+// TEXTOS A MAYUSCULAS
+Vue.filter("mayusculas", function(text) {
+    if (!text) return "";
+    text = text.toString();
+    return text.toUpperCase();
+});
+
+// FORMATEO DE FECHAS - REFERENCIA : https://momentjs.com/
+import moment from "moment";
+Vue.filter("fechas", function(created) {
+    if (!created) return "";
+    return moment(created).format("lll");
+});
+
+// Tuggle Button - Referencia : http://vue-js-toggle-button.yev.io/
+import ToggleButton from "vue-js-toggle-button";
+Vue.use(ToggleButton);
 
 //VUE ROUTER - REFERENCIA : https://router.vuejs.org/installation.html
 import VueRouter from "vue-router";

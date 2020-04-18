@@ -1,10 +1,75 @@
 <template >
   <div row mt-4>
     <div class="container-fluid">
+      <!-- AQUI LOS WIDGETS -->
+      <div class="row">
+        <div class="col-md-3 col-sm-6 col-12">
+          <div class="info-box">
+            <span class="info-box-icon bg-info">
+              <i class="fas fa-folder-open"></i>
+            </span>
+
+            <div class="info-box-content">
+              <span class="info-box-text">Messages</span>
+              <span class="info-box-number">1,410</span>
+            </div>
+            <!-- /.info-box-content -->
+          </div>
+          <!-- /.info-box -->
+        </div>
+        <!-- /.col -->
+        <div class="col-md-3 col-sm-6 col-12">
+          <div class="info-box">
+            <span class="info-box-icon bg-success">
+              <i class="fas fa-flag"></i>
+            </span>
+
+            <div class="info-box-content">
+              <span class="info-box-text">Bookmarks</span>
+              <span class="info-box-number">410</span>
+            </div>
+            <!-- /.info-box-content -->
+          </div>
+          <!-- /.info-box -->
+        </div>
+        <!-- /.col -->
+        <div class="col-md-3 col-sm-6 col-12">
+          <div class="info-box">
+            <span class="info-box-icon bg-warning">
+              <i class="fas fa-copy"></i>
+            </span>
+
+            <div class="info-box-content">
+              <span class="info-box-text">Uploads</span>
+              <span class="info-box-number">13,648</span>
+            </div>
+            <!-- /.info-box-content -->
+          </div>
+          <!-- /.info-box -->
+        </div>
+        <!-- /.col -->
+        <div class="col-md-3 col-sm-6 col-12">
+          <div class="info-box">
+            <span class="info-box-icon bg-danger">
+              <i class="fas fa-star"></i>
+            </span>
+
+            <div class="info-box-content">
+              <span class="info-box-text">Likes</span>
+              <span class="info-box-number">93,139</span>
+            </div>
+            <!-- /.info-box-content -->
+          </div>
+          <!-- /.info-box -->
+        </div>
+        <!-- /.col -->
+      </div>
+
+      <!-- FIN WIDGET -->
       <div>
         <div class="card">
           <div class="card-header">
-            <h3 class="card-title">NUEVOS INGRESOS</h3>
+            <h3 class="card-title">SOLICITUDES</h3>
             <div class="card-tools">
               <button type="button" @click="MostrarModal()" class="btn btn-primary">
                 <i class="fa fa-user-plus" aria-hidden="true"></i> Agregar
@@ -36,7 +101,25 @@
                   <td>{{ solicitud.nombres}} {{solicitud.apellidos}}</td>
                   <td>{{ solicitud.departamento }}</td>
                   <td>{{ solicitud.puesto }}</td>
-                  <td>{{ solicitud.estado }}</td>
+                  <td v-if="solicitud.estado=='Abierto'">
+                    <toggle-button
+                      :value="true"
+                      color="#99CF16"
+                      :sync="true"
+                      :labels="true"
+                      disabled
+                    />
+                  </td>
+                  <td v-else>
+                    <toggle-button
+                      :value="false"
+                      color="#99CF16"
+                      :sync="true"
+                      :labels="true"
+                      disabled
+                    />
+                  </td>
+                  <!-- <td>{{ solicitud.estado }}</td> -->
                   <td>{{ solicitud.Prioridad }}</td>
                   <td>{{ solicitud.created_at | fechas }}</td>
                   <td>{{ solicitud.created_at | fechas }}</td>
@@ -53,6 +136,10 @@
         </div>
         <!-- /.card -->
       </div>
+      <!-- INICIO BOTTON floating -->
+      <!-- Floating Action Button like Google Material -->
+
+      <!-- FIN BOOTON floating -->
       <!-- Modal -->
     </div>
   </div>
@@ -62,6 +149,7 @@
 export default {
   data() {
     return {
+      activo: false,
       db_solicitudes: {}
     };
   },

@@ -39,10 +39,14 @@
                   <td>{{ solicitud.puesto }}</td>
                   <td>{{ solicitud.estado }}</td>
                   <td>{{ solicitud.Prioridad }}</td>
-                  <td>{{ solicitud.created_at | fechas }}</td>getSolicitudes
+                  <td>{{ solicitud.created_at | fechas }}</td>
                   <td pl-4>
                     <a ref="#">
                       <i class="fas fa-ellipsis-v"></i>
+                      <button
+                        class="btn pmd-btn-raised pmd-ripple-effect btn-success"
+                        type="button"
+                      >Success</button>
                     </a>
                   </td>
                 </tr>
