@@ -25,7 +25,7 @@ class SolicitudController extends Controller
    
    public function getDepartamentos(){
 
-       $departamento=Departamento::where('status',true)->get();
+       $departamento=Departamento::where('activo',true)->get();
         return response()->json($departamento);
    }
 

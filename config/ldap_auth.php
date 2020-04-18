@@ -288,10 +288,12 @@ return [
     */
 
  
-    'sync_attributes' => [
+  'sync_attributes' => [
 
         'username' => 'samaccountname',
         'name' => 'cn',
+        'apellidos' => 'sn',
+        'nombres' => 'givenname',
         'correo' => 'userprincipalname',
         'puesto' => 'title',
         'departamento' => 'department',

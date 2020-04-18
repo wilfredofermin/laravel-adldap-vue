@@ -71,9 +71,44 @@
           <div class="card-header">
             <h3 class="card-title">SOLICITUDES</h3>
             <div class="card-tools">
-              <button type="button" @click="MostrarModal()" class="btn btn-primary">
-                <i class="fa fa-user-plus" aria-hidden="true"></i> Agregar
-              </button>
+              <!-- <button type="button" @click="MostrarModal()" class="btn btn-primary btn-sm">
+                <i class="fa fa-user-plus" aria-hidden="true"></i> Ingreso
+              </button>-->
+
+              <div class="dropdown">
+                <button
+                  class="btn btn-primary dropdown-toggle"
+                  type="button"
+                  id="dropdownMenu2"
+                  data-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                >Solicitud</button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                  <button
+                    class="dropdown-item btn-sm btn-block"
+                    type="button"
+                    @click="modalIngreso()"
+                  >
+                    <i class="fa fa-user-plus text-center" aria-hidden="true"></i> Nuevo Ingreso
+                  </button>
+                  <button
+                    class="dropdown-item btn-sm btn-block"
+                    type="button"
+                    @click="MostrarModal()"
+                  >
+                    <i class="fa fa-user-edit text-center" aria-hidden="true"></i> Modificacion
+                  </button>
+                  <hr />
+                  <button
+                    class="dropdown-item btn-sm btn-block"
+                    type="button"
+                    @click="MostrarModal()"
+                  >
+                    <i class="fa fa-user-times text-center" aria-hidden="true"></i> Desahucio
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
           <div class="card-tool"></div>
@@ -83,21 +118,34 @@
               <thead>
                 <tr>
                   <th width="5%">ServicesKit</th>
-                  <th width="5%">Cedula</th>
+                  <th width="5%">Tipo</th>
                   <th width="20%">Nombres</th>
                   <th width="15%">Departamento</th>
                   <th width="15%">Puesto</th>
                   <th width="5%">Estado</th>
-                  <th width="5%">Prioridad</th>
                   <th width="15%">Creacion</th>
                   <th width="15%">Modificacion</th>
+                  <th width="5%">Prioridad</th>
                   <th width="5%" text-align:center>Opciones</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="solicitud in db_solicitudes" :key="solicitud.id">
                   <td>{{ solicitud.serviceskit }}</td>
-                  <td>{{ solicitud.cedula}}</td>
+
+                  <td v-if="solicitud.tipo ==1">
+                    <button type="button" class="btn btn-outline-success btn-sm btn-block">Ingreso</button>
+                  </td>
+                  <td v-else-if="solicitud.tipo ==2">
+                    <button type="button" class="btn btn-outline-danger btn-sm btn-block">Desahucio</button>
+                  </td>
+                  <td v-else>
+                    <button
+                      type="button"
+                      class="btn btn-outline-primary btn-sm btn-block"
+                    >Modificacion</button>
+                  </td>
+
                   <td>{{ solicitud.nombres | capitalize }} {{solicitud.apellidos | capitalize }}</td>
                   <td>{{ solicitud.departamento | capitalize }}</td>
                   <td>{{ solicitud.puesto | capitalize }}</td>
@@ -119,8 +167,10 @@
                       disabled
                     />
                   </td>
-                  <!-- <td>{{ solicitud.estado }}</td> -->
-                  <!-- <td>{{ solicitud.Prioridad | capitalize }}</td> -->
+
+                  <td>{{ solicitud.created_at | fechas }}</td>
+                  <td>{{ solicitud.created_at | fechas }}</td>
+
                   <td v-if="solicitud.Prioridad =='normal'">
                     <button type="button" class="btn btn-outline-primary btn-sm btn-block">Normal</button>
                   </td>
@@ -130,8 +180,7 @@
                   <td v-else>
                     <button type="button" class="btn btn-outline-success btn-sm btn-block">Baja</button>
                   </td>
-                  <td>{{ solicitud.created_at | fechas }}</td>
-                  <td>{{ solicitud.created_at | fechas }}</td>
+
                   <td pl-4>
                     <a ref="#">
                       <i class="fas fa-ellipsis-v"></i>
@@ -145,11 +194,254 @@
         </div>
         <!-- /.card -->
       </div>
-      <!-- INICIO BOTTON floating -->
-      <!-- Floating Action Button like Google Material -->
+      <!-- MODAL NUEVO INGRESO -->
+      <form @submit.prevent="postIngreso()" @keydown="form.onKeydown($event) ">
+        <div
+          class="modal fade"
+          id="addnew"
+          tabindex="-1"
+          role="dialog"
+          aria-labelledby="addnew"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-dialog-centered modal-lg cl" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="addnew">NUEVO INGRESO</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <!-- CEDULA -->
+                <div class="card card-header">
+                  <div class="row">
+                    <div class="div col-3">
+                      <div class="form-group">
+                        <div class="input-group mb-3">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text">
+                              <i class="fas fa-fingerprint"></i>
+                            </span>
+                          </div>
+                          <input
+                            v-model="form.cedula"
+                            outlined
+                            type="text"
+                            name="cedula"
+                            placeholder="Cedula"
+                            ref="cedula"
+                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                            pattern="\d*"
+                            maxlength="11"
+                            id="cedula"
+                            class="form-control"
+                            :class="{ 'is-invalid': form.errors.has('cedula') }"
+                          />
+                          <has-error :form="form" field="nombre"></has-error>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- -------------------------------------------------------------------------------------------------- -->
+                  <!-- PRIMER NOMBRE -->
+                  <div class="row">
+                    <div class="col-md-10">
+                      <div class="form-group">
+                        <div class="input-group mb-3">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text">
+                              <i class="fas fa-user"></i>
+                            </span>
+                          </div>
+                          <input
+                            v-model="form.primer_nombre"
+                            type="text"
+                            name="primer_nombre"
+                            placeholder="Primer Nombre"
+                            ref="primer_nombre"
+                            id="primer_nombre"
+                            class="form-control"
+                            :class="{ 'is-invalid': form.errors.has('primer_nombre') }"
+                          />
+                          <has-error :form="form" field="primer_nombre"></has-error>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- SEGUNDO NOMBRE -->
+                    <div class="col-md-2">
+                      <div class="form-group">
+                        <div class="input-group mb-3">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text">
+                              <i class="fas fa-user"></i>
+                            </span>
+                          </div>
+                          <input
+                            v-model="form.segundo_nombre"
+                            type="text"
+                            name="segundo_nombre"
+                            placeholder="SN"
+                            ref="SN"
+                            pattern="\d*"
+                            maxlength="1"
+                            id="segundo_nombre"
+                            autofocus
+                            class="form-control"
+                            :class="{ 'is-invalid': form.errors.has('segundo_nombre') }"
+                          />
+                          <has-error :form="form" field="segundo_nombre"></has-error>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- -------------------------------------------------------------------------------------------------- -->
+                  <!-- PRIMER APELLIDO -->
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <div class="input-group mb-3">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text">
+                              <i class="fas fa-user-tag"></i>
+                            </span>
+                          </div>
+                          <input
+                            v-model="form.primer_apellido"
+                            type="text"
+                            name="primer_apellido"
+                            placeholder="Primer Apellido"
+                            ref="primer_apellido"
+                            id="primer_apellido"
+                            class="form-control"
+                            :class="{ 'is-invalid': form.errors.has('primer_apellido') }"
+                          />
+                          <has-error :form="form" field="primer_apellido"></has-error>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- SEGUNDO APELLIDO -->
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <div class="input-group mb-3">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text">
+                              <i class="fas fa-user-tag"></i>
+                            </span>
+                          </div>
+                          <input
+                            v-model="form.segundo_apellido"
+                            type="text"
+                            name="segundo_apellido"
+                            placeholder="Segundo Nombre | opcional"
+                            text-transform:
+                            lowercase
+                            ref="segundo_apellido"
+                            id="segundo_apellido"
+                            autofocus
+                            class="form-control"
+                            :class="{ 'is-invalid': form.errors.has('segundo_apellido') }"
+                          />
+                          <has-error :form="form" field="segundo_apellido"></has-error>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- -------------------------------------------------------------------------------------------------- -->
+                <!-- DEPARTAMENTO -->
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <select
+                        @change.prevent="getPuestos()"
+                        name="departamento"
+                        v-model="form.select_departamento"
+                        id="departamento"
+                        class="form-control"
+                      >
+                        <option value selected disabled hidden>Departamento</option>
+                        <option
+                          v-for="depatamento in data_departamentos"
+                          :key="depatamento.id"
+                          :value="depatamento.id"
+                        >{{ depatamento.nombre }}</option>
+                      </select>
+                      <has-error :form="form" field="departamento"></has-error>
+                    </div>
+                  </div>
+                  <!-- PUESTO -->
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <select
+                        @change="getLocalidad()"
+                        name="puesto"
+                        v-model="form.select_puesto"
+                        id="puesto"
+                        class="form-control"
+                        :class="{ 'is-invalid':form.errors.has('select_puesto')}"
+                      >
+                        <option value selected disabled hidden>Puesto</option>
+                        <option
+                          v-for="puestoArray in data_puestos"
+                          :key="puestoArray.id"
+                        >{{ puestoArray.nombre }}</option>
+                      </select>
+                      <has-error :form="form" field="puesto"></has-error>
+                    </div>
+                  </div>
+                  <!-- LOCALIDAD -->
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <select
+                        name="localidad"
+                        v-model="form.select_localidad"
+                        id="localidad"
+                        class="form-control"
+                      >
+                        <option value selected disabled hidden>Localidad</option>
+                        <option v-for="loc in data_localidad" :key="loc.id">{{ loc.nombre }}</option>
+                      </select>
+                      <has-error :form="form" field="localidad"></has-error>
+                    </div>
+                  </div>
+                  <!-- -------------------------------------------------------------------------------------------------- -->
+                  <!-- SUPERVISOR-->
+                  <div class="col-md-12">
+                    <div class="form-group">
+                      <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text">
+                            <i class="fas fa-envelope"></i>
+                          </span>
+                        </div>
+                        <input
+                          v-model="form.supervisor"
+                          type="email"
+                          name="supervisor"
+                          id="supervisor"
+                          class="form-control"
+                          placeholder="Correo Electronico de Supervisor"
+                          :class="{ 'is-invalid': form.errors.has('supervisor') }"
+                        />
+                        <has-error :form="form" field="supervisor"></has-error>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-      <!-- FIN BOOTON floating -->
-      <!-- Modal -->
+                <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i> Enviar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+      <!-- fin modal -->
+      <!-- MODAL DESHAUCIO-MODIFICACION -->
     </div>
   </div>
 </template>
@@ -159,18 +451,71 @@ export default {
   data() {
     return {
       activo: false,
-      db_solicitudes: {}
+      db_solicitudes: {},
+      data_departamentos: {},
+      data_puestos: {},
+      data_localidad: {},
+      form: new Form({
+        cedula: "",
+        primer_nombre: "",
+        segundo_nombre: "",
+        primer_apellido: "",
+        segundo_apellido: "",
+        select_departamento: "",
+        select_puesto: "",
+        select_localidad: "",
+        supervisor: ""
+      })
     };
   },
   methods: {
+    modalIngreso: function() {
+      this.editmode = false;
+      this.form.reset();
+      $("#addnew").modal("show");
+    },
     getSolicitudes() {
       axios.get("/getSolicitudes").then(response => {
         this.db_solicitudes = response.data;
+      });
+    },
+    getDepartamentos() {
+      axios.get("/getDepartamentos").then(response => {
+        this.data_departamentos = response.data;
+      });
+    },
+    getPuestos() {
+      this.form.select_puesto = "";
+
+      if (this.form.select_departamento != "") {
+        axios
+          .get("/getPuestos", {
+            params: { departamento_id: this.form.select_departamento }
+          })
+          .then(response => {
+            this.data_puestos = response.data;
+            document.getElementById("puesto").disabled = false;
+          })
+          .catch(e => {
+            console.log(e);
+          });
+      }
+    },
+    getLocalidad() {
+      this.form.select_localidad = "";
+      axios.get("/getLocalidad").then(response => {
+        this.data_localidad = response.data;
+        document.getElementById("localidad").disabled = false;
       });
     }
   },
   created() {
     this.getSolicitudes();
+    this.getDepartamentos();
+  },
+  mounted() {
+    document.getElementById("puesto").disabled = true;
+    document.getElementById("localidad").disabled = true;
   }
 };
 </script>

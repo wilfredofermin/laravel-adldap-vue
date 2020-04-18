@@ -23,7 +23,7 @@ class SolicitudSeeder extends Seeder
             'localidad' => 'Julio Verne',
             'prioridad' =>'normal',
             'supervisor_email'     => 'rcontrera@viva.com.do',
-            'registrado_por'     => 'wfermin',
+            'registrado_por'     => 'uprueba',
             'modificado_por'     => '',
                
         ]);
@@ -39,7 +39,7 @@ class SolicitudSeeder extends Seeder
             'localidad' => 'Julio Verne',
             'prioridad' =>'normal',
             'supervisor_email'     => 'smardonado@viva.com.do',
-            'registrado_por'     => 'wfermin',
+            'registrado_por'     => 'uprueba',
             'modificado_por'     => '', 
            
         ]);
@@ -54,7 +54,7 @@ class SolicitudSeeder extends Seeder
             'localidad' => 'Julio Verne',
             'prioridad' =>'alta',
             'supervisor_email'     => 'smardonado@viva.com.do',
-            'registrado_por'     => 'wfermin',
+            'registrado_por'     => 'uprueba',
             'modificado_por'     => '',
             
         ]);

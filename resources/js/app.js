@@ -34,6 +34,12 @@ Vue.filter("fechas", function(created) {
 import ToggleButton from "vue-js-toggle-button";
 Vue.use(ToggleButton);
 
+//VFORM - COMPONENTE QUE PERMITE TRABAJAR CON LOS FORMUNLARIO - REFERENCIA : https://github.com/wilfredofermin/vform
+window.Form = Form;
+import { Form, HasError, AlertError } from "vform";
+Vue.component(HasError.name, HasError);
+Vue.component(AlertError.name, AlertError);
+
 //VUE ROUTER - REFERENCIA : https://router.vuejs.org/installation.html
 import VueRouter from "vue-router";
 Vue.use(VueRouter);

@@ -20,6 +20,8 @@ class CreateUsersTable extends Migration
         $table->string('objectguid')->nullable(); // Added here.
         $table->string('password');
         $table->string('name');
+          $table->string('apellidos')->nullable(); 
+        $table->string('nombres')->nullable(); 
         $table->string('correo')->nullable(); 
         $table->string('telefono')->nullable(); 
         $table->string('puesto')->nullable(); 
