@@ -5,7 +5,8 @@ use Illuminate\Support\Facades\DB;
 use App\Solicitud;
 use App\Departamento;
 use App\Localidad;
-
+use Auth;
+use App\user;
 use Illuminate\Http\Request;
 
 class SolicitudController extends Controller
@@ -14,8 +15,12 @@ class SolicitudController extends Controller
 
  public function getSolicitudes(){
 
-       $getSolicitudes=Solicitud::latest()->get();
+    //    $getSolicitudes=Solicitud::latest()->get();
+     $getSolicitudes=Solicitud::where('registrado_por',Auth::user()->username)->get();
+    //     return response()->json($getSolicitudes);
+
         return response()->json($getSolicitudes);
+
    }
    
    public function getDepartamentos(){

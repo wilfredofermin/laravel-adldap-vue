@@ -98,9 +98,9 @@
                 <tr v-for="solicitud in db_solicitudes" :key="solicitud.id">
                   <td>{{ solicitud.serviceskit }}</td>
                   <td>{{ solicitud.cedula}}</td>
-                  <td>{{ solicitud.nombres}} {{solicitud.apellidos}}</td>
-                  <td>{{ solicitud.departamento }}</td>
-                  <td>{{ solicitud.puesto }}</td>
+                  <td>{{ solicitud.nombres | capitalize }} {{solicitud.apellidos | capitalize }}</td>
+                  <td>{{ solicitud.departamento | capitalize }}</td>
+                  <td>{{ solicitud.puesto | capitalize }}</td>
                   <td v-if="solicitud.estado=='Abierto'">
                     <toggle-button
                       :value="true"
@@ -120,7 +120,16 @@
                     />
                   </td>
                   <!-- <td>{{ solicitud.estado }}</td> -->
-                  <td>{{ solicitud.Prioridad }}</td>
+                  <!-- <td>{{ solicitud.Prioridad | capitalize }}</td> -->
+                  <td v-if="solicitud.Prioridad =='normal'">
+                    <button type="button" class="btn btn-outline-primary btn-sm btn-block">Normal</button>
+                  </td>
+                  <td v-else-if="solicitud.Prioridad =='baja'">
+                    <button type="button" class="btn btn-outline-danger btn-sm btn-block">Alta</button>
+                  </td>
+                  <td v-else>
+                    <button type="button" class="btn btn-outline-success btn-sm btn-block">Baja</button>
+                  </td>
                   <td>{{ solicitud.created_at | fechas }}</td>
                   <td>{{ solicitud.created_at | fechas }}</td>
                   <td pl-4>

@@ -2072,6 +2072,15 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
@@ -56251,15 +56260,21 @@ var render = function() {
                     _vm._v(" "),
                     _c("td", [
                       _vm._v(
-                        _vm._s(solicitud.nombres) +
+                        _vm._s(_vm._f("capitalize")(solicitud.nombres)) +
                           " " +
-                          _vm._s(solicitud.apellidos)
+                          _vm._s(_vm._f("capitalize")(solicitud.apellidos))
                       )
                     ]),
                     _vm._v(" "),
-                    _c("td", [_vm._v(_vm._s(solicitud.departamento))]),
+                    _c("td", [
+                      _vm._v(
+                        _vm._s(_vm._f("capitalize")(solicitud.departamento))
+                      )
+                    ]),
                     _vm._v(" "),
-                    _c("td", [_vm._v(_vm._s(solicitud.puesto))]),
+                    _c("td", [
+                      _vm._v(_vm._s(_vm._f("capitalize")(solicitud.puesto)))
+                    ]),
                     _vm._v(" "),
                     solicitud.estado == "Abierto"
                       ? _c(
@@ -56293,7 +56308,41 @@ var render = function() {
                           1
                         ),
                     _vm._v(" "),
-                    _c("td", [_vm._v(_vm._s(solicitud.Prioridad))]),
+                    solicitud.Prioridad == "normal"
+                      ? _c("td", [
+                          _c(
+                            "button",
+                            {
+                              staticClass:
+                                "btn btn-outline-primary btn-sm btn-block",
+                              attrs: { type: "button" }
+                            },
+                            [_vm._v("Normal")]
+                          )
+                        ])
+                      : solicitud.Prioridad == "baja"
+                      ? _c("td", [
+                          _c(
+                            "button",
+                            {
+                              staticClass:
+                                "btn btn-outline-danger btn-sm btn-block",
+                              attrs: { type: "button" }
+                            },
+                            [_vm._v("Alta")]
+                          )
+                        ])
+                      : _c("td", [
+                          _c(
+                            "button",
+                            {
+                              staticClass:
+                                "btn btn-outline-success btn-sm btn-block",
+                              attrs: { type: "button" }
+                            },
+                            [_vm._v("Baja")]
+                          )
+                        ]),
                     _vm._v(" "),
                     _c("td", [
                       _vm._v(_vm._s(_vm._f("fechas")(solicitud.created_at)))
