@@ -30,6 +30,28 @@ Vue.filter("fechas", function(created) {
     return moment(created).format("lll");
 });
 
+// SISTEMA DE MENSAJES - SWEET ALERT 2 - REF : https://sweetalert2.github.io/#download
+// Video Tutorial : https://www.youtube.com/watch?v=qJt6EfbQu6E&list=PL2GMR7k4bG4QOzLtn4WgMmLAjfKiAvRa1&index=19
+import swal from "sweetalert2";
+window.swal = swal;
+
+const toast = swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000
+});
+window.toast = toast;
+
+//PROGRESS BAR - REFERENCIA : http://hilongjw.github.io/vue-progressbar/
+// VIDEO TUTORIAL : https://www.youtube.com/watch?v=-Hl4A5cMH_I&list=PL2GMR7k4bG4QOzLtn4WgMmLAjfKiAvRa1&index=18
+import VueProgressBar from "vue-progressbar";
+Vue.use(VueProgressBar, {
+    color: "rgb(143, 255, 199)",
+    failedColor: "red",
+    height: "3px"
+});
+
 // Tuggle Button - Referencia : http://vue-js-toggle-button.yev.io/
 import ToggleButton from "vue-js-toggle-button";
 Vue.use(ToggleButton);
@@ -50,6 +72,9 @@ let routes = [
         component: require("./components/Serviceskit.vue").default
     }
 ];
+
+// RECARGAR DATOS -> Ref : https://vuejs.org/v2/guide/components-custom-events.html
+window.Fire = new Vue();
 
 const router = new VueRouter({
     routes, // short for `routes: routes`,

@@ -206,6 +206,7 @@ Este proyecto ha sido creado para ser utilizado con fines interno a la empresa. 
                 <div class="container-fluid">
                     <br>
                     {{-- -----------------------CONTENIDO DINAMICO AQUI---------------------------- --}}
+                    <vue-progress-bar></vue-progress-bar>
                     <router-view></router-view>
                     {{-- @yield('content') --}}
                     {{-- --------------------------------------------------------------------------- --}}

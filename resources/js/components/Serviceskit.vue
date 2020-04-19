@@ -120,7 +120,6 @@
                   <th width="5%">ServicesKit</th>
                   <th width="5%">Tipo</th>
                   <th width="20%">Nombres</th>
-                  <th width="15%">Departamento</th>
                   <th width="15%">Puesto</th>
                   <th width="5%">Estado</th>
                   <th width="15%">Creacion</th>
@@ -145,9 +144,7 @@
                       class="btn btn-outline-primary btn-sm btn-block"
                     >Modificacion</button>
                   </td>
-
                   <td>{{ solicitud.nombres | capitalize }} {{solicitud.apellidos | capitalize }}</td>
-                  <td>{{ solicitud.departamento | capitalize }}</td>
                   <td>{{ solicitud.puesto | capitalize }}</td>
                   <td v-if="solicitud.estado=='Abierto'">
                     <toggle-button
@@ -195,7 +192,7 @@
         <!-- /.card -->
       </div>
       <!-- MODAL NUEVO INGRESO -->
-      <form @submit.prevent="postIngreso()" @keydown="form.onKeydown($event) ">
+      <form @submit="postIngreso()">
         <div
           class="modal fade"
           id="addnew"
@@ -282,11 +279,10 @@
                             type="text"
                             name="segundo_nombre"
                             placeholder="SN"
-                            ref="SN"
+                            ref="segundo_nombre"
                             pattern="\d*"
                             maxlength="1"
                             id="segundo_nombre"
-                            autofocus
                             class="form-control"
                             :class="{ 'is-invalid': form.errors.has('segundo_nombre') }"
                           />
@@ -356,16 +352,17 @@
                       <select
                         @change.prevent="getPuestos()"
                         name="departamento"
-                        v-model="form.select_departamento"
+                        v-model="form.departamento"
                         id="departamento"
                         class="form-control"
+                        :class="{ 'is-invalid':form.errors.has('departamento')}"
                       >
                         <option value selected disabled hidden>Departamento</option>
                         <option
-                          v-for="depatamento in data_departamentos"
-                          :key="depatamento.id"
-                          :value="depatamento.id"
-                        >{{ depatamento.nombre }}</option>
+                          v-for="departamento in data_departamentos"
+                          :value="departamento.id"
+                          :key="departamento.id"
+                        >{{ departamento.nombre }}</option>
                       </select>
                       <has-error :form="form" field="departamento"></has-error>
                     </div>
@@ -376,10 +373,10 @@
                       <select
                         @change="getLocalidad()"
                         name="puesto"
-                        v-model="form.select_puesto"
+                        v-model="form.puesto"
                         id="puesto"
                         class="form-control"
-                        :class="{ 'is-invalid':form.errors.has('select_puesto')}"
+                        :class="{ 'is-invalid':form.errors.has('puesto')}"
                       >
                         <option value selected disabled hidden>Puesto</option>
                         <option
@@ -395,9 +392,10 @@
                     <div class="form-group">
                       <select
                         name="localidad"
-                        v-model="form.select_localidad"
+                        v-model="form.localidad"
                         id="localidad"
                         class="form-control"
+                        :class="{ 'is-invalid':form.errors.has('localidad')}"
                       >
                         <option value selected disabled hidden>Localidad</option>
                         <option v-for="loc in data_localidad" :key="loc.id">{{ loc.nombre }}</option>
@@ -451,28 +449,55 @@ export default {
   data() {
     return {
       activo: false,
+      //   dynamicValue: false,
       db_solicitudes: {},
-      data_departamentos: {},
-      data_puestos: {},
-      data_localidad: {},
+      data_departamentos: [],
+      data_puestos: [],
+      data_localidad: [],
       form: new Form({
         cedula: "",
         primer_nombre: "",
         segundo_nombre: "",
         primer_apellido: "",
         segundo_apellido: "",
-        select_departamento: "",
-        select_puesto: "",
-        select_localidad: "",
+        departamento: "",
+        puesto: "",
+        localidad: "",
         supervisor: ""
       })
     };
   },
   methods: {
     modalIngreso: function() {
-      this.editmode = false;
       this.form.reset();
       $("#addnew").modal("show");
+    },
+
+    postIngreso() {
+      // 1- Cargo el progress bar
+      this.$Progress.start();
+      this.form
+        .post("/postIngreso")
+        //DE TODO ESTAR CORRECTO ----> video tutorail : https://www.youtube.com/watch?v=97JFc7g_0wE&list=PL2GMR7k4bG4QOzLtn4WgMmLAjfKiAvRa1&index=22
+        .then(() => {
+          // Submit the form via a POST request
+          // 2- Hago la peticion de la data
+          //3- Recargo los datos
+          Fire.$emit("RecargarData");
+          //4- Cierro la ventana modal
+          $("#addnew").modal("hide");
+          //5- Cargo la barra como finalizado por proceso
+          this.$Progress.finish();
+          //6- Hago la notificacion
+          toast.fire({
+            type: "success",
+            title: "Usuario creado exitosamente"
+          });
+        })
+        //DE LO CONTRARIO
+        .catch(() => {
+          this.$Progress.fail();
+        });
     },
     getSolicitudes() {
       axios.get("/getSolicitudes").then(response => {
@@ -485,12 +510,12 @@ export default {
       });
     },
     getPuestos() {
-      this.form.select_puesto = "";
+      this.form.puesto = "";
 
-      if (this.form.select_departamento != "") {
+      if (this.form.departamento != "") {
         axios
           .get("/getPuestos", {
-            params: { departamento_id: this.form.select_departamento }
+            params: { departamento_id: this.form.departamento }
           })
           .then(response => {
             this.data_puestos = response.data;
@@ -502,7 +527,7 @@ export default {
       }
     },
     getLocalidad() {
-      this.form.select_localidad = "";
+      this.form.localidad = "";
       axios.get("/getLocalidad").then(response => {
         this.data_localidad = response.data;
         document.getElementById("localidad").disabled = false;
@@ -512,7 +537,12 @@ export default {
   created() {
     this.getSolicitudes();
     this.getDepartamentos();
+
+    Fire.$on("RecargarData", () => {
+      this.getSolicitudes();
+    });
   },
+
   mounted() {
     document.getElementById("puesto").disabled = true;
     document.getElementById("localidad").disabled = true;

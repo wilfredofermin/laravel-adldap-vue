@@ -33,5 +33,7 @@ Route::get('/getDepartamentos', 'SolicitudController@getDepartamentos')->name('g
 Route::get('/getPuestos', 'SolicitudController@getPuestos')->name('getPuestos');
 Route::get('/getLocalidad', 'SolicitudController@getLocalidad')->name('getLocalidad');
 
+Route::post('/postIngreso', 'SolicitudController@postIngreso')->name('postIngreso');
+
 // Vue-Router 
 Route::get('{path}', 'HomeController@index')->where( 'path' , '([A-z\d\-\/_.]+)?' );
