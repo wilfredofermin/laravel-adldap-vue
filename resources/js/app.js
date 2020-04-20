@@ -70,6 +70,8 @@ let routes = [
     {
         path: "/serviceskit",
         component: require("./components/Serviceskit.vue").default
+        // path: "/atencion",
+        // component: require("./components/Atencion.vue").default
     }
 ];
 

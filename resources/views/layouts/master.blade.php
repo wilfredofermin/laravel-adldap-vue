@@ -140,9 +140,9 @@ Este proyecto ha sido creado para ser utilizado con fines interno a la empresa. 
                                     </router-link>
                                 </li>
                                 <li class="nav-item">
-                                    <router-link to="/inactivos" class="nav-link">
-                                        <i class="fas fa-user-times nav-icon"></i>
-                                        <p>Inactivos</p>
+                                    <router-link to="/atencion" class="nav-link">
+                                        <i class="fas fa-tags"></i>
+                                        <p>Atencion</p>
                                         </a>
                                     </router-link>
                                 </li>

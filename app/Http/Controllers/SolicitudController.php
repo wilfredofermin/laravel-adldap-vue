@@ -77,7 +77,7 @@ class SolicitudController extends Controller
             $supervisor_email = $request['supervisor'];
             // 'registrado_por' => Auth::user()->username ,
            
-           
+           $detalles_solicititud ='CEDULA :'.' '.$cedula.' | '.'NOMBRE :'.' '.$nombres.' '.$apellidos.' | '.'PUESTO :'.' '.$puesto.' | '.'SUPERVISOR :'.' '.$supervisor_email.' | '.'LOCALIDAD :'.' '.$localidad;
 
 
           $Urs ='http://servicekit.viva.com.do/servlets/RequestServlet?';
@@ -98,12 +98,13 @@ class SolicitudController extends Controller
             'requester' =>  Auth::user()->name,
             'createdby' =>  Auth::user()->name,
             // DESCRIPCION DE LA SOLICITUD 
-             'description' =>'Ver datos en archiv abjunto' ,
-           
-           
+                // DESCRIPCION DE LA SOLICITUD 
+            'description' =>$detalles_solicititud ,
+
             // VALORES DE LA PLANTILLA
             // 'subject' => 'Solicitudes de Accesos y/o Administración de Empleados',
             'subject' => 'Creacion Nuevo Usuario de Dominio',
+            'shortdescription' => '',
             'requesttemplate' => '2001 Accesos y Administracion de Usuarios',
             'service' => '002 Solicitudes de Empleados',
             'category' => 'Solicitudes De Acceso',
@@ -123,8 +124,6 @@ class SolicitudController extends Controller
 
             $resultado = Str::limit($extraerEntero, 5,''); 
 
-        if($resultado){
-
         return Solicitud::create([
         
             'tipo' =>  1,
@@ -138,11 +137,8 @@ class SolicitudController extends Controller
             'localidad' => $request['localidad'],
             'supervisor_email' => $request['supervisor'],
             'registrado_por' => Auth::user()->username ,
-            'modificado_por' => '', 
+            'modificado_por' => Auth::user()->username , 
         ]);
-
-        }
-
 
         // return 'ok';
     }
@@ -192,6 +188,8 @@ class SolicitudController extends Controller
                                 // 'operation' => 'UpdateRequest',
                                 // ---Eliminar
                                 // 'operation' => 'DeleteRequest',
+                                // ---Agregar Nota
+                                // 'operation'= >'AddNotes'
 
 
                                 // USURIOS DE ACCESO AL SISTEMA
@@ -222,6 +220,7 @@ class SolicitudController extends Controller
                                 // VALORES DE LA PLANTILLA
                                 // 'subject' => 'Solicitudes de Accesos y/o Administración de Empleados',
                                 'subject' => 'Creacion Nuevo Usuario de Dominio',
+                                'shortdescription' => '',
                                 'requesttemplate' => '2001 Accesos y Administracion de Usuarios',
                                 'service' => '002 Solicitudes de Empleados',
                                 'category' => 'Solicitudes De Acceso',
