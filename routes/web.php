@@ -25,15 +25,17 @@ Auth::routes([
 ]);
 
 
+
+Route::post('/postIngreso', 'SolicitudController@postIngreso')->name('postIngreso');
+
 Route::get('/home', 'HomeController@index')->name('home');
-
-
+Route::get('/test', 'SolicitudController@test')->name('test');
 Route::get('/getSolicitudes', 'SolicitudController@getSolicitudes')->name('getSolicitudes');
 Route::get('/getDepartamentos', 'SolicitudController@getDepartamentos')->name('getDepartamentos');
 Route::get('/getPuestos', 'SolicitudController@getPuestos')->name('getPuestos');
 Route::get('/getLocalidad', 'SolicitudController@getLocalidad')->name('getLocalidad');
+Route::get('/infoSolicitud/{id}', 'SolicitudController@infoSolicitud')->name('infoSolicitud');
 
-Route::post('/postIngreso', 'SolicitudController@postIngreso')->name('postIngreso');
 
 // Vue-Router 
 Route::get('{path}', 'HomeController@index')->where( 'path' , '([A-z\d\-\/_.]+)?' );

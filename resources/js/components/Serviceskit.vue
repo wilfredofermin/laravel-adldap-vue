@@ -97,14 +97,6 @@
                     type="button"
                     @click="MostrarModal()"
                   >
-                    <i class="fa fa-user-edit text-center" aria-hidden="true"></i> Modificacion
-                  </button>
-                  <hr />
-                  <button
-                    class="dropdown-item btn-sm btn-block"
-                    type="button"
-                    @click="MostrarModal()"
-                  >
                     <i class="fa fa-user-times text-center" aria-hidden="true"></i> Desahucio
                   </button>
                 </div>
@@ -125,11 +117,14 @@
                   <th width="15%">Creacion</th>
                   <th width="15%">Modificacion</th>
                   <th width="5%">Prioridad</th>
-                  <th width="5%" text-align:center>Opciones</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="solicitud in db_solicitudes" :key="solicitud.id">
+                <tr
+                  v-for="solicitud in db_solicitudes"
+                  :key="solicitud.id "
+                  @click="modalInfo(solicitud)"
+                >
                   <td>{{ solicitud.serviceskit }}</td>
 
                   <td v-if="solicitud.tipo ==1">
@@ -177,12 +172,6 @@
                   <td v-else>
                     <button type="button" class="btn btn-outline-success btn-sm btn-block">Baja</button>
                   </td>
-
-                  <td pl-4>
-                    <a ref="#">
-                      <i class="fas fa-ellipsis-v"></i>
-                    </a>
-                  </td>
                 </tr>
               </tbody>
             </table>
@@ -192,7 +181,7 @@
         <!-- /.card -->
       </div>
       <!-- MODAL NUEVO INGRESO -->
-      <form @submit="postIngreso()">
+      <form @submit.prevent="postIngreso()">
         <div
           class="modal fade"
           id="addnew"
@@ -226,7 +215,7 @@
                             outlined
                             type="text"
                             name="cedula"
-                            placeholder="Cedula"
+                            placeholder="cedula"
                             ref="cedula"
                             onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                             pattern="\d*"
@@ -235,7 +224,7 @@
                             class="form-control"
                             :class="{ 'is-invalid': form.errors.has('cedula') }"
                           />
-                          <has-error :form="form" field="nombre"></has-error>
+                          <has-error :form="form" field="cedula"></has-error>
                         </div>
                       </div>
                     </div>
@@ -392,6 +381,7 @@
                     <div class="form-group">
                       <select
                         name="localidad"
+                        @change="ActivarSupervisor()"
                         v-model="form.localidad"
                         id="localidad"
                         class="form-control"
@@ -439,6 +429,66 @@
         </div>
       </form>
       <!-- fin modal -->
+      <!-- MODAL INFO -->
+      <div class="modal fade" id="modalInfo">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Large Modal</h4>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <div class="input-group mb-3">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text">
+                          <i class="fas fa-user"></i>
+                        </span>
+                      </div>
+                      <input
+                        type="text"
+                        v-model="nombre_completo"
+                        name="nombre_completo"
+                        readonly
+                        ref="nombre_completo"
+                        id="nombre_completo"
+                        class="form-control"
+                      />
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <div class="input-group mb-3">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text">
+                          <i class="fas fa-user"></i>
+                        </span>
+                      </div>
+                      <input
+                        type="text"
+                        v-model="cedula_info"
+                        name="cedula_info"
+                        readonly
+                        ref="cedula_info"
+                        id="cedula_info"
+                        class="form-control"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+              <button type="button" class="btn btn-primary right-align">Salir</button>
+            </div>
+          </div>
+          <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+      </div>
       <!-- MODAL DESHAUCIO-MODIFICACION -->
     </div>
   </div>
@@ -451,9 +501,12 @@ export default {
       activo: false,
       //   dynamicValue: false,
       db_solicitudes: {},
+      db_infosolicitud: {},
       data_departamentos: [],
       data_puestos: [],
       data_localidad: [],
+      nombre_completo: "",
+      cedula_info: "",
       form: new Form({
         cedula: "",
         primer_nombre: "",
@@ -468,6 +521,7 @@ export default {
     };
   },
   methods: {
+    // VENTANA MODAL
     modalIngreso: function() {
       this.form.reset();
       $("#addnew").modal("show");
@@ -499,6 +553,16 @@ export default {
           this.$Progress.fail();
         });
     },
+    // VENTANA MODAL
+    // modalInfo: function(solicitud) {
+    //   $("#modalInfo").modal("show");
+    //   axios.get("/infoSolicitud/" + solicitud.id).then(response => {
+    //     this.nombre_completo =
+    //       response.data.nombres + " " + response.data.apellidos;
+    //     this.cedula_info = response.data.cedula;
+    //   });
+    // },
+
     getSolicitudes() {
       axios.get("/getSolicitudes").then(response => {
         this.db_solicitudes = response.data;
@@ -526,6 +590,9 @@ export default {
           });
       }
     },
+    ActivarSupervisor() {
+      document.getElementById("supervisor").disabled = false;
+    },
     getLocalidad() {
       this.form.localidad = "";
       axios.get("/getLocalidad").then(response => {
@@ -535,17 +602,21 @@ export default {
     }
   },
   created() {
+    this.$Progress.start();
     this.getSolicitudes();
     this.getDepartamentos();
 
     Fire.$on("RecargarData", () => {
       this.getSolicitudes();
     });
+
+    this.$Progress.finish();
   },
 
   mounted() {
     document.getElementById("puesto").disabled = true;
     document.getElementById("localidad").disabled = true;
+    document.getElementById("supervisor").disabled = true;
   }
 };
 </script>

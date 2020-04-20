@@ -73,6 +73,8 @@ let routes = [
     }
 ];
 
+Vue.component("modalinfo", require("./components/modalInfo.vue").default);
+
 // RECARGAR DATOS -> Ref : https://vuejs.org/v2/guide/components-custom-events.html
 window.Fire = new Vue();
 

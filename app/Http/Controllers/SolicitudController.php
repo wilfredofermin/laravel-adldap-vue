@@ -1,13 +1,20 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use Illuminate\Http\Requestinput;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
+use responseresponseIlluminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Support\Facades\DB;
+
 use App\Solicitud;
 use App\Departamento;
 use App\Localidad;
 use Auth;
 use App\user;
-use Illuminate\Http\Request;
+
 
 class SolicitudController extends Controller
 {
@@ -19,11 +26,7 @@ class SolicitudController extends Controller
     }
 
     public function getSolicitudes(){
-     $getSolicitudes=Solicitud::where('registrado_por',Auth::user()->username)->get();
-        return response()->json($getSolicitudes);
-    //    $getSolicitudes=Solicitud::latest()->get();
-    //     return response()->json($getSolicitudes);
-
+        return Solicitud::where('registrado_por',Auth::user()->username)->orderBy('created_at', 'desc')->get();
    }
    
    public function getDepartamentos(){
@@ -46,23 +49,87 @@ class SolicitudController extends Controller
 
    }
 
+     public function infoSolicitud($id){
+
+        return Solicitud::findOrFail($id);
+     }
+
     public function postIngreso(Request $request)
     {   
         $this->validate($request, [
-            'cedula' =>  'max:11|min:11',
-            'primer_nombre' => 'required|max:30',
-            'primer_apellido' => 'required|max:30',
+            'cedula' =>  'required',
+            'primer_nombre' => 'required',
+            'primer_apellido' => 'required',
             'departamento' => 'required',
             'puesto' => 'required',
             'localidad' => 'required',
             'supervisor' => 'required|email',
-        ]);
+        ]);    
+
+            
+            
+            
+            $cedula =  $request['cedula'];
+            $nombres = $request['primer_nombre'].' '.$request['segundo_nombre'];
+            $apellidos = $request['primer_apellido'].' '.$request['segundo_apellido'];
+            $puesto = $request['puesto'];
+            $localidad = $request['localidad'];
+            $supervisor_email = $request['supervisor'];
+            // 'registrado_por' => Auth::user()->username ,
+           
+           
+
+
+          $Urs ='http://servicekit.viva.com.do/servlets/RequestServlet?';
+      
+
+            // Parametros
+            $query =[
+                              
+            'operation' => 'AddRequest',
+            // VALIACION AL SISTEMA SISTEMA
+            'username' => env('SERVICESKIT_USERNAME'),
+            'password' => env('SERVICESKIT_PASSWORD'),
+            // -------------------
+
+            //  DATOS A COMPLETAR POR EL FORMULARIO   
+
+
+            'requester' =>  Auth::user()->name,
+            'createdby' =>  Auth::user()->name,
+            // DESCRIPCION DE LA SOLICITUD 
+             'description' =>'Ver datos en archiv abjunto' ,
+           
+           
+            // VALORES DE LA PLANTILLA
+            // 'subject' => 'Solicitudes de Accesos y/o Administración de Empleados',
+            'subject' => 'Creacion Nuevo Usuario de Dominio',
+            'requesttemplate' => '2001 Accesos y Administracion de Usuarios',
+            'service' => '002 Solicitudes de Empleados',
+            'category' => 'Solicitudes De Acceso',
+            'subcategory' => 'Administracion De Usuarios',
+            'item' => 'Nuevo Usuario',
+            'site' => 'Viva',
+            'group'=> 'IT-OPS-STI',
+            // 'technician' => 'sti', //--> Si coloco como tecnico STI esta ira intercambiando las solicitudes a los tecnicos disponnibles
+            'technician' => 'Wilfredo Fermin Reyes',
+
+            ];
+ 
+
+            $response = (Http::retry(3, 100)->get($Urs, $query));
+
+            $extraerEntero = preg_replace('/[^0-9]+/', '', $response);
+
+            $resultado = Str::limit($extraerEntero, 5,''); 
+
+        if($resultado){
 
         return Solicitud::create([
         
             'tipo' =>  1,
             'prioridad' =>'normal',
-            'serviceskit' =>  20212,
+            'serviceskit' =>  $resultado,
             'cedula' =>  $request['cedula'],
             'nombres' => $request['primer_nombre'].' '.$request['segundo_nombre'],
             'apellidos' => $request['primer_apellido'].' '.$request['segundo_apellido'],
@@ -74,25 +141,125 @@ class SolicitudController extends Controller
             'modificado_por' => '', 
         ]);
 
+        }
+
+
         // return 'ok';
     }
 
 
-    // DB::table('solicituds')->insert([
-    //         'Tipo' => '1',
-    //         'serviceskit' => '20206',
-    //         'cedula' => '00112960026',
-    //         'nombres' =>'Pedro B.',
-    //         'apellidos' => 'Lopez Bermudez',
-    //         'departamento' =>'Tecnologia',
-    //         'puesto' => 'Programador',
-    //         'localidad' => 'Julio Verne',
-    //         'prioridad' =>'normal',
-    //         'supervisor_email'     => 'smardonado@viva.com.do',
-    //         'registrado_por'     => 'uprueba',
-    //         'modificado_por'     => '', 
+    public function test()
+    {
+        
+            // TRABAJANDO  CON GUZZLE 6
+            // http://docs.guzzlephp.org/en/stable/request-options.html?highlight=format
+   
+        // $client = new Client([
+                // Base URI is used with relative requests
+        //         'base_uri' => 'http://servicekit.viva.com.do/servlets/RequestServlet?',
+                // You can set any number of default request options.
+        //             'timeout'  => 10.0,
+                   
+        //         ]);
+
+        //         $response = $client->request('GET', 'http://servicekit.viva.com.do/servlets/RequestServlet?', ['query' =>  [
+        //                         'operation' => 'GetRequestDetails',
+        //                        // USURIOS DE ACCESO AL SISTEMA
+                                    // 'username' => env('SERVICESKIT_USERNAME'),
+                                    // 'password' => env('SERVICESKIT_PASSWORD'),
+        //                         'workOrderID' => '35824',
+                    
+        //                         ]
+        //         ]);
+        //     dd(json_decode($response->getBody()->getContents()));
+
+            // dd($response->getBody()->getContents());
+            // dd($response->getBody());
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // TRABAJANDO CON CON EL CLIENTE HTTP DE LARAVEL
+            // https://laravel.com/docs/7.x/http-client
+  
+            // Url base
+            $Urs ='http://servicekit.viva.com.do/servlets/RequestServlet?';
+     
+            // Parametros
+            $query =[
+                                // ---Buscar
+                                // 'operation' => 'GetRequestDetails',
+                                // ---Agregar
+                                'operation' => 'AddRequest',
+                                // ---UpdateRequest
+                                // 'operation' => 'UpdateRequest',
+                                // ---Eliminar
+                                // 'operation' => 'DeleteRequest',
+
+
+                                // USURIOS DE ACCESO AL SISTEMA
+                                'username' => env('SERVICESKIT_USERNAME'),
+                                'password' => env('SERVICESKIT_PASSWORD'),
+                                // -------------------
+
+                                //  DATOS A COMPLETAR POR EL FORMULARIO   
+                               
+                                'requester' =>  Auth::user()->name,
+                                'createdby' =>  Auth::user()->name,
+                                // DESCRIPCION DE LA SOLICITUD 
+                                'description' =>'<pre>
+                                                <h2 align="center">DETALLES DEL NUEVO USUARIO SOLICITADO</h2> 
+                                                <DIV align="left">
+                                                <hr style="width:65%;">
+                                                | COMPLETO                  | <strong>Luis Gonzalez Matias</strong>                            
+                                                | CEDULA O PASAPORTE        | <strong>001-152699-8</strong>                                    
+                                                | PUESTO                    | <strong>Analista de Sistemas</strong>                            
+                                                | DEPARTAMENTO              | <strong>Tecnologia</strong>                                      
+                                                | SUPERVISOR                | <strong>Pablo Ortega Lopez</strong>                              
+                                                | LOCALIDAD                 | <strong>Julio Verne</strong>                              
+                                                <hr style="width:65%;">
+                                                </DIV>
+                                                 </pre>
+                                                 ',
+
+                                // VALORES DE LA PLANTILLA
+                                // 'subject' => 'Solicitudes de Accesos y/o Administración de Empleados',
+                                'subject' => 'Creacion Nuevo Usuario de Dominio',
+                                'requesttemplate' => '2001 Accesos y Administracion de Usuarios',
+                                'service' => '002 Solicitudes de Empleados',
+                                'category' => 'Solicitudes De Acceso',
+                                'subcategory' => 'Administracion De Usuarios',
+                                'item' => 'Nuevo Usuario',
+                                'site' => 'Viva',
+                                'group'=> 'IT-OPS-STI',
+                                // 'technician' => 'sti', //--> Si coloco como tecnico STI esta ira intercambiando las solicitudes a los tecnicos disponnibles
+                                'technician' => 'Wilfredo Fermin Reyes',
+
+            ];
+
+
+            $response = (Http::retry(3, 100)->get($Urs, $query));
+
+            $extraerEntero = preg_replace('/[^0-9]+/', '', $response);
+
+            $resultado = Str::limit($extraerEntero, 5,'');
            
-    //     ]);
+            // $resultado = ereg_replace(“[^0-9]”, “”, $response);
+
+            // $response->getStatusCode();
+
+            // $response->headers(Http::retry(3, 100)->get($Urs, $query));
+        //    dd ($resultado);
+            // dd($response->getBody()->getContents());
+            // dd(($response->getBody()->getContents()));
+
+       
+                // ($response->input('workOrderID'));
+
+            
+            //  dd()->json();
+
+            //  $user = Auth::user()->name;
+            // dd($user);
+
+    }
 
 
 }
