@@ -35,6 +35,7 @@ Route::get('/getDepartamentos', 'SolicitudController@getDepartamentos')->name('g
 Route::get('/getPuestos', 'SolicitudController@getPuestos')->name('getPuestos');
 Route::get('/getLocalidad', 'SolicitudController@getLocalidad')->name('getLocalidad');
 Route::get('/infoSolicitud/{id}', 'SolicitudController@infoSolicitud')->name('infoSolicitud');
+Route::get('/getEmpleado', 'SolicitudController@getEmpleado')->name('getEmpleado');
 
 
 // Vue-Router 

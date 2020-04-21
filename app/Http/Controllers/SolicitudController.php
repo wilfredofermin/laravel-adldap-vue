@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use responseresponseIlluminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Support\Facades\DB;
+use Adldap\Laravel\Facades\Adldap;
 
 use App\Solicitud;
 use App\Departamento;
@@ -25,34 +26,55 @@ class SolicitudController extends Controller
         $this->middleware('auth');
     }
 
+
+    // ----------------------------------------------------------------------------------------------------
+    // PATICIONES BASE DE DATOS LOCAL
+    // ----------------------------------------------------------------------------------------------------
     public function getSolicitudes(){
         return Solicitud::where('registrado_por',Auth::user()->username)->orderBy('created_at', 'desc')->get();
    }
    
    public function getDepartamentos(){
-
        $departamento=Departamento::where('activo',true)->get();
         return response()->json($departamento);
    }
 
    public function getLocalidad(){
-       $localidad=Localidad::latest()->get();
-        return response()->json($localidad);
+       return Localidad::latest()->get();
    }
-
 
    public function getPuestos(Request $request){
-      // $puestos = Puesto::where(departamento_id, 3)->get();
-
-      // return $puestos = DB::table('puestos')->where('departamento_id', '=',3 )->get();
       return $puestos = DB::table('puestos')->where('departamento_id', '=',$request->departamento_id )->get();
-
    }
 
-     public function infoSolicitud($id){
+    public function infoSolicitud($id){
+    return Solicitud::findOrFail($id);
+    }
 
-        return Solicitud::findOrFail($id);
+
+ // ----------------------------------------------------------------------------------------------------
+ // PETICIONES AL ACTIVE DIRECTORY
+ // ----------------------------------------------------------------------------------------------------
+     public function getEmpleado(){
+
+        //  dd(\Request::get('q'));
+
+         if($buscar = \Request::get('q')){
+
+       return  Adldap::search()->findByOrFail('samaccountname', $buscar);
+        //  return Adldap::search()->where('userprincipalname', $buscar)->getQuery();
+        //  return Adldap::findByDn($buscar,'dc=om,dc=do' );
+
+        //  $search->findByDn('cn=John Doe,dc=corp,dc=org');
+            
+            // return $resultado->toJson();
+         }
+
      }
+
+// ----------------------------------------------------------------------------------------------------
+// PATICIONES AL SESRVICEKIT - MANAGEENGINE
+// ----------------------------------------------------------------------------------------------------
 
     public function postIngreso(Request $request)
     {   
@@ -66,19 +88,18 @@ class SolicitudController extends Controller
             'supervisor' => 'required|email',
         ]);    
 
-            
-            
-            
+            // CONVERTIMOS LOS VALORES PARA PODER INCLUIRLO EN EL FORMULARIO
             $cedula =  $request['cedula'];
             $nombres = $request['primer_nombre'].' '.$request['segundo_nombre'];
             $apellidos = $request['primer_apellido'].' '.$request['segundo_apellido'];
+            $nombrecompleto = $nombres.' '.$apellidos;
             $puesto = $request['puesto'];
             $localidad = $request['localidad'];
             $supervisor_email = $request['supervisor'];
             // 'registrado_por' => Auth::user()->username ,
            
-           $detalles_solicititud ='CEDULA :'.' '.$cedula.' | '.'NOMBRE :'.' '.$nombres.' '.$apellidos.' | '.'PUESTO :'.' '.$puesto.' | '.'SUPERVISOR :'.' '.$supervisor_email.' | '.'LOCALIDAD :'.' '.$localidad;
-
+            $detalles_solicititud ='CEDULA :'.' '.$cedula.' | '.'NOMBRE :'.' '.$nombrecompleto.' | '.'PUESTO :'.' '.$puesto.' | '.'SUPERVISOR :'.' '.$supervisor_email.' | '.'LOCALIDAD :'.' '.$localidad;
+            $subject = 'NUEVO INGRESO :'.' '.$nombrecompleto; 
 
           $Urs ='http://servicekit.viva.com.do/servlets/RequestServlet?';
       
@@ -93,8 +114,6 @@ class SolicitudController extends Controller
             // -------------------
 
             //  DATOS A COMPLETAR POR EL FORMULARIO   
-
-
             'requester' =>  Auth::user()->name,
             'createdby' =>  Auth::user()->name,
             // DESCRIPCION DE LA SOLICITUD 
@@ -103,7 +122,7 @@ class SolicitudController extends Controller
 
             // VALORES DE LA PLANTILLA
             // 'subject' => 'Solicitudes de Accesos y/o Administración de Empleados',
-            'subject' => 'Creacion Nuevo Usuario de Dominio',
+            'subject' => $subject ,
             'shortdescription' => '',
             'requesttemplate' => '2001 Accesos y Administracion de Usuarios',
             'service' => '002 Solicitudes de Empleados',
@@ -116,16 +135,15 @@ class SolicitudController extends Controller
             'technician' => 'Wilfredo Fermin Reyes',
 
             ];
- 
-
+            // AQUI OPTENEMOS LA RESPUESTA RECIBIDA DEL SERVIDOR - SERVICESKT
             $response = (Http::retry(3, 100)->get($Urs, $query));
 
+            // DEBIDO A QUE EL RESULTADO VIEN DENTRO DE UNA CADENA, DEBEMOS SACAR ESE VALOR
             $extraerEntero = preg_replace('/[^0-9]+/', '', $response);
-
+            // DEBIDO A QUE EL VALOR SE REPITE, LIMITAMOS
             $resultado = Str::limit($extraerEntero, 5,''); 
-
+            // DESPUES DE OBTENER EL RESULTADO LO ASIGNAMOS CON EL CODIGO DE SERVICESKIT MAS ABAJO
         return Solicitud::create([
-        
             'tipo' =>  1,
             'prioridad' =>'normal',
             'serviceskit' =>  $resultado,
@@ -144,9 +162,38 @@ class SolicitudController extends Controller
     }
 
 
+
+
     public function test()
     {
         
+
+            // ACTIVE DIRECTORY FUNCIONALIDADES
+
+
+                // username' => 'samaccountname',
+                // 'name' => 'cn',
+                // 'apellidos' => 'sn',
+                // 'nombres' => 'givenname',
+                // 'correo' => 'userprincipalname',
+                // 'puesto' => 'title',
+                // 'departamento' => 'department',
+                // 'oficina' => 'physicaldeliveryofficename',
+                // 'supervisor' => 'manager',
+                // 'compania' => 'company',
+                // 'telefono' => 'telephonenumber',
+
+            // $users = $this->ldap->search()->users()->get();
+            // $user = Adldap::search()->users()->find('wfermin');
+            // $search->select(['cn', 'samaccountname', 'telephone', 'mail']);
+            // admwfermin@om.do
+
+            //  $results = Adldap::search()->find('admwfermin');
+
+             $results = Adldap::search()->where('userprincipalname', 'admwfermin@om.do')->get();
+
+            dd($results);
+
             // TRABAJANDO  CON GUZZLE 6
             // http://docs.guzzlephp.org/en/stable/request-options.html?highlight=format
    

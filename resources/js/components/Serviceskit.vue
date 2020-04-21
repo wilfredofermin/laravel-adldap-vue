@@ -33,7 +33,7 @@
                   <button
                     class="dropdown-item btn-sm btn-block"
                     type="button"
-                    @click="MostrarModal()"
+                    @click="modalDesahucio()"
                   >
                     <i class="fa fa-user-times text-center" aria-hidden="true"></i> Desahucio
                   </button>
@@ -357,7 +357,7 @@
                 </div>
 
                 <div class="modal-footer">
-                  <button type="submit" class="btn btn-primary">
+                  <button type="submit" class="btn btn-outline-success">
                     <i class="fas fa-paper-plane"></i> Enviar
                   </button>
                 </div>
@@ -422,7 +422,7 @@
                     <div class="input-group mb-3">
                       <div class="input-group-prepend">
                         <span class="input-group-text">
-                          <i class="fas fa-eye"></i>
+                          <i class="fas fa-user"></i>
                         </span>
                       </div>
                       <input
@@ -448,6 +448,128 @@
         <!-- /.modal-dialog -->
       </div>
       <!-- MODAL DESHAUCIO-MODIFICACION -->
+      <!-- /.modal -->
+
+      <div class="modal fade" id="modalDeshaucio">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">SOLICITUD DE SALIDAD</h4>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <div v-show="!mostrar" class="input-group mb-3">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">
+                        <i class="fas fa-user"></i>
+                      </span>
+                    </div>
+                    <input
+                      placeholder="Por favor, indique el usuario del empleado"
+                      type="text"
+                      v-model="buscar_empleado"
+                      @keyup.enter="getEmpleado"
+                      name="buscar_empleado"
+                      ref="buscar_empleado"
+                      id="buscar_empleado"
+                      class="form-control"
+                    />
+                  </div>
+                  <!-- Widget: user widget style 2 -->
+                  <div v-show="mostrar" class="card card-widget widget-user-2">
+                    <!-- Add the bg color to the header using any of the bg-* classes -->
+                    <div class="widget-user-header bg-primary">
+                      <div class="widget-user-image">
+                        <img
+                          class="img-circle elevation-2"
+                          src="/img/profile/user.png"
+                          alt="User Avatar"
+                        />
+                      </div>
+                      <!-- /.widget-user-image -->
+                      <h3 class="widget-user-username">{{empleado_nombre | capitalize}}</h3>
+                      <h5 class="widget-user-desc">{{empleado_puesto |capitalize}}</h5>
+                    </div>
+                    <div class="card-footer p-0">
+                      <ul class="nav flex-column">
+                        <li class="nav-item">
+                          <a href="#" class="nav-link">
+                            Usuario
+                            <span
+                              class="description-text float-right"
+                            >{{empleado_usuario | capitalize }}</span>
+                          </a>
+                        </li>
+                        <li class="nav-item">
+                          <a href="#" class="nav-link">
+                            Departamento
+                            <span
+                              class="description-text float-right"
+                            >{{empleado_departamento | capitalize}}</span>
+                          </a>
+                        </li>
+                        <li class="nav-item">
+                          <a href="#" class="nav-link">
+                            Correo Electronico
+                            <span
+                              class="description-text float-right"
+                            >{{empleado_email | capitalize }}</span>
+                          </a>
+                        </li>
+                        <li class="nav-item">
+                          <a href="#" class="nav-link">
+                            Localidad
+                            <span
+                              class="description-text float-right"
+                            >{{empleado_localidad | capitalize}}</span>
+                          </a>
+                        </li>
+                        <li class="nav-item">
+                          <a href="#" class="nav-link">
+                            Supervisor
+                            <span
+                              class="description-text float-right"
+                            >{{empleado_supervisor | capitalize}}</span>
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <!-- /.widget-user -->
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+              <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Cerrar</button>
+              <button
+                v-show="!mostrar"
+                type="button"
+                class="btn btn-outline-primary"
+                @click.prevent="getEmpleado"
+              >
+                <i class="fas fa-search"></i> Buscar
+              </button>
+              <button
+                v-show="mostrar"
+                type="button"
+                class="btn btn-outline-success"
+                @click.prevent="postEmpleado"
+              >
+                <i class="fas fa-paper-plane"></i> Enviar
+              </button>
+            </div>
+          </div>
+          <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+      </div>
+      <!-- /.modal -->
+
+      <!-- FIN MODAL DESHUCION -->
     </div>
   </div>
 </template>
@@ -457,15 +579,27 @@ export default {
   data() {
     return {
       activo: false,
+      // Cuando inicia oculta los demas input en el modal Desahucio
+      mostrar: false,
       //   dynamicValue: false,
       db_solicitudes: {},
+      db_empleados: {},
       db_infosolicitud: {},
       data_departamentos: [],
       data_puestos: [],
       data_localidad: [],
-      nombre_completo: "",
-      cedula_info: "",
-      supervisor_info: "",
+      nombre_completo: null,
+      SubV: null,
+      empleado_nombre: null,
+      empleado_email: null,
+      buscar_empleado: null,
+      empleado_usuario: null,
+      empleado_supervisor: null,
+      empleado_departamento: null,
+      empleado_localidad: null,
+      empleado_puesto: null,
+      cedula_info: null,
+      supervisor_info: null,
       form: new Form({
         cedula: "",
         primer_nombre: "",
@@ -474,6 +608,14 @@ export default {
         segundo_apellido: "",
         departamento: "",
         puesto: "",
+        localidad: "",
+        supervisor: ""
+      }),
+      formSalida: new Form({
+        Nombres: "",
+        Puesto: "",
+        usuaio: "",
+        departamento: "",
         localidad: "",
         supervisor: ""
       })
@@ -504,7 +646,7 @@ export default {
           //6- Hago la notificacion
           toast.fire({
             type: "success",
-            title: "Usuario creado exitosamente"
+            title: "Solicitud realizada exitosamente"
           });
         })
         //DE LO CONTRARIO
@@ -512,7 +654,7 @@ export default {
           this.$Progress.fail();
         });
     },
-    // VENTANA MODAL
+    // VENTANA MODAL - MODAL DE INFORMACION
     modalInfo: function(solicitud) {
       $("#modalInfo").modal("show");
       axios.get("/infoSolicitud/" + solicitud.id).then(response => {
@@ -523,6 +665,53 @@ export default {
         this.supervisor_info = response.data.supervisor_email;
       });
     },
+
+    modalDesahucio: function() {
+      $("#modalDeshaucio").modal("show");
+    },
+    // ----------------------------------------------------------------------------
+    // PETICIONES AL ACTIVE DIRECTORY
+    // ----------------------------------------------------------------------------
+    getEmpleado() {
+      if (this.buscar_empleado != "") {
+        let buscar = this.buscar_empleado;
+        axios
+          .get("/getEmpleado?q=" + buscar)
+          .then(response => {
+            this.$Progress.start();
+            // console.log((this.db_empleados = response.data.description));
+            this.mostrar = true;
+
+            this.db_empleados = response.data;
+            // NOMBRES
+            this.empleado_nombre = response.data.name;
+            // USUARIO
+            this.empleado_usuario = response.data.samaccountname;
+            // DEPARTAMENTO
+            this.empleado_departamento = response.data.department;
+            // PUESTO
+            this.empleado_puesto = response.data.description;
+            // LOCALIDAD
+            this.empleado_localidad = response.data.physicaldeliveryofficename;
+            // EMAIL
+            this.empleado_email = response.data.userprincipalname;
+            // SUPERVISOR
+            this.empleado_supervisor = response.data.manager;
+
+            // this.empleado_supervisor.slice(-2);
+            // this.sections.splice(index, 1)
+
+            // months.splice(1, 0, 'Feb');
+            // value.replace(/[^a-zA-Z0-9@]+/, '')
+
+            this.$Progress.finish();
+          })
+          .catch(e => {
+            console.log(e);
+          });
+      }
+    },
+    // ----------------------------------------------------------------------------
 
     getSolicitudes() {
       axios.get("/getSolicitudes").then(response => {

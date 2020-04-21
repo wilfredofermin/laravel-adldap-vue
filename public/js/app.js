@@ -2379,19 +2379,153 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
       activo: false,
+      // Cuando inicia oculta los demas input en el modal Desahucio
+      mostrar: false,
       //   dynamicValue: false,
       db_solicitudes: {},
+      db_empleados: {},
       db_infosolicitud: {},
       data_departamentos: [],
       data_puestos: [],
       data_localidad: [],
-      nombre_completo: "",
-      cedula_info: "",
-      supervisor_info: "",
+      nombre_completo: null,
+      SubV: null,
+      empleado_nombre: null,
+      empleado_email: null,
+      buscar_empleado: null,
+      empleado_usuario: null,
+      empleado_supervisor: null,
+      empleado_departamento: null,
+      empleado_localidad: null,
+      empleado_puesto: null,
+      cedula_info: null,
+      supervisor_info: null,
       form: new Form({
         cedula: "",
         primer_nombre: "",
@@ -2430,14 +2564,14 @@ __webpack_require__.r(__webpack_exports__);
 
         toast.fire({
           type: "success",
-          title: "Usuario creado exitosamente"
+          title: "Solicitud realizada exitosamente"
         });
       }) //DE LO CONTRARIO
       ["catch"](function () {
         _this.$Progress.fail();
       });
     },
-    // VENTANA MODAL
+    // VENTANA MODAL - MODAL DE INFORMACION
     modalInfo: function modalInfo(solicitud) {
       var _this2 = this;
 
@@ -2448,22 +2582,64 @@ __webpack_require__.r(__webpack_exports__);
         _this2.supervisor_info = response.data.supervisor_email;
       });
     },
-    getSolicitudes: function getSolicitudes() {
+    modalDesahucio: function modalDesahucio() {
+      $("#modalDeshaucio").modal("show");
+    },
+    // ----------------------------------------------------------------------------
+    // PETICIONES AL ACTIVE DIRECTORY
+    // ----------------------------------------------------------------------------
+    getEmpleado: function getEmpleado() {
       var _this3 = this;
 
+      if (this.buscar_empleado != "") {
+        var buscar = this.buscar_empleado;
+        axios.get("/getEmpleado?q=" + buscar).then(function (response) {
+          _this3.$Progress.start(); // console.log((this.db_empleados = response.data.description));
+
+
+          _this3.mostrar = true;
+          _this3.db_empleados = response.data; // NOMBRES
+
+          _this3.empleado_nombre = response.data.name; // USUARIO
+
+          _this3.empleado_usuario = response.data.samaccountname; // DEPARTAMENTO
+
+          _this3.empleado_departamento = response.data.department; // PUESTO
+
+          _this3.empleado_puesto = response.data.description; // LOCALIDAD
+
+          _this3.empleado_localidad = response.data.physicaldeliveryofficename; // EMAIL
+
+          _this3.empleado_email = response.data.userprincipalname; // SUPERVISOR
+
+          _this3.empleado_supervisor = response.data.manager; // this.empleado_supervisor.slice(-2);
+          // this.sections.splice(index, 1)
+          // months.splice(1, 0, 'Feb');
+          // value.replace(/[^a-zA-Z0-9@]+/, '')
+
+          _this3.$Progress.finish();
+        })["catch"](function (e) {
+          console.log(e);
+        });
+      }
+    },
+    // ----------------------------------------------------------------------------
+    getSolicitudes: function getSolicitudes() {
+      var _this4 = this;
+
       axios.get("/getSolicitudes").then(function (response) {
-        _this3.db_solicitudes = response.data;
+        _this4.db_solicitudes = response.data;
       });
     },
     getDepartamentos: function getDepartamentos() {
-      var _this4 = this;
+      var _this5 = this;
 
       axios.get("/getDepartamentos").then(function (response) {
-        _this4.data_departamentos = response.data;
+        _this5.data_departamentos = response.data;
       });
     },
     getPuestos: function getPuestos() {
-      var _this5 = this;
+      var _this6 = this;
 
       this.form.puesto = "";
 
@@ -2473,7 +2649,7 @@ __webpack_require__.r(__webpack_exports__);
             departamento_id: this.form.departamento
           }
         }).then(function (response) {
-          _this5.data_puestos = response.data;
+          _this6.data_puestos = response.data;
           document.getElementById("puesto").disabled = false;
         })["catch"](function (e) {
           console.log(e);
@@ -2484,23 +2660,23 @@ __webpack_require__.r(__webpack_exports__);
       document.getElementById("supervisor").disabled = false;
     },
     getLocalidad: function getLocalidad() {
-      var _this6 = this;
+      var _this7 = this;
 
       this.form.localidad = "";
       axios.get("/getLocalidad").then(function (response) {
-        _this6.data_localidad = response.data;
+        _this7.data_localidad = response.data;
         document.getElementById("localidad").disabled = false;
       });
     }
   },
   created: function created() {
-    var _this7 = this;
+    var _this8 = this;
 
     this.$Progress.start();
     this.getSolicitudes();
     this.getDepartamentos();
     Fire.$on("RecargarData", function () {
-      _this7.getSolicitudes();
+      _this8.getSolicitudes();
     });
     this.$Progress.finish();
   },
@@ -60813,7 +60989,7 @@ var render = function() {
                         attrs: { type: "button" },
                         on: {
                           click: function($event) {
-                            return _vm.MostrarModal()
+                            return _vm.modalDesahucio()
                           }
                         }
                       },
@@ -61768,7 +61944,353 @@ var render = function() {
             _vm._m(13)
           ])
         ])
-      ])
+      ]),
+      _vm._v(" "),
+      _c(
+        "div",
+        { staticClass: "modal fade", attrs: { id: "modalDeshaucio" } },
+        [
+          _c("div", { staticClass: "modal-dialog modal-lg" }, [
+            _c("div", { staticClass: "modal-content" }, [
+              _vm._m(14),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-body" }, [
+                _c("div", { staticClass: "col-md-12" }, [
+                  _c("div", { staticClass: "form-group" }, [
+                    _c(
+                      "div",
+                      {
+                        directives: [
+                          {
+                            name: "show",
+                            rawName: "v-show",
+                            value: !_vm.mostrar,
+                            expression: "!mostrar"
+                          }
+                        ],
+                        staticClass: "input-group mb-3"
+                      },
+                      [
+                        _vm._m(15),
+                        _vm._v(" "),
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.buscar_empleado,
+                              expression: "buscar_empleado"
+                            }
+                          ],
+                          ref: "buscar_empleado",
+                          staticClass: "form-control",
+                          attrs: {
+                            placeholder:
+                              "Por favor, indique el usuario del empleado",
+                            type: "text",
+                            name: "buscar_empleado",
+                            id: "buscar_empleado"
+                          },
+                          domProps: { value: _vm.buscar_empleado },
+                          on: {
+                            keyup: function($event) {
+                              if (
+                                !$event.type.indexOf("key") &&
+                                _vm._k(
+                                  $event.keyCode,
+                                  "enter",
+                                  13,
+                                  $event.key,
+                                  "Enter"
+                                )
+                              ) {
+                                return null
+                              }
+                              return _vm.getEmpleado($event)
+                            },
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.buscar_empleado = $event.target.value
+                            }
+                          }
+                        })
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      {
+                        directives: [
+                          {
+                            name: "show",
+                            rawName: "v-show",
+                            value: _vm.mostrar,
+                            expression: "mostrar"
+                          }
+                        ],
+                        staticClass: "card card-widget widget-user-2"
+                      },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "widget-user-header bg-primary" },
+                          [
+                            _vm._m(16),
+                            _vm._v(" "),
+                            _c("h3", { staticClass: "widget-user-username" }, [
+                              _vm._v(
+                                _vm._s(
+                                  _vm._f("capitalize")(_vm.empleado_nombre)
+                                )
+                              )
+                            ]),
+                            _vm._v(" "),
+                            _c("h5", { staticClass: "widget-user-desc" }, [
+                              _vm._v(
+                                _vm._s(
+                                  _vm._f("capitalize")(_vm.empleado_puesto)
+                                )
+                              )
+                            ])
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "card-footer p-0" }, [
+                          _c("ul", { staticClass: "nav flex-column" }, [
+                            _c("li", { staticClass: "nav-item" }, [
+                              _c(
+                                "a",
+                                {
+                                  staticClass: "nav-link",
+                                  attrs: { href: "#" }
+                                },
+                                [
+                                  _vm._v(
+                                    "\n                          Usuario\n                          "
+                                  ),
+                                  _c(
+                                    "span",
+                                    {
+                                      staticClass:
+                                        "description-text float-right"
+                                    },
+                                    [
+                                      _vm._v(
+                                        _vm._s(
+                                          _vm._f("capitalize")(
+                                            _vm.empleado_usuario
+                                          )
+                                        )
+                                      )
+                                    ]
+                                  )
+                                ]
+                              )
+                            ]),
+                            _vm._v(" "),
+                            _c("li", { staticClass: "nav-item" }, [
+                              _c(
+                                "a",
+                                {
+                                  staticClass: "nav-link",
+                                  attrs: { href: "#" }
+                                },
+                                [
+                                  _vm._v(
+                                    "\n                          Departamento\n                          "
+                                  ),
+                                  _c(
+                                    "span",
+                                    {
+                                      staticClass:
+                                        "description-text float-right"
+                                    },
+                                    [
+                                      _vm._v(
+                                        _vm._s(
+                                          _vm._f("capitalize")(
+                                            _vm.empleado_departamento
+                                          )
+                                        )
+                                      )
+                                    ]
+                                  )
+                                ]
+                              )
+                            ]),
+                            _vm._v(" "),
+                            _c("li", { staticClass: "nav-item" }, [
+                              _c(
+                                "a",
+                                {
+                                  staticClass: "nav-link",
+                                  attrs: { href: "#" }
+                                },
+                                [
+                                  _vm._v(
+                                    "\n                          Correo Electronico\n                          "
+                                  ),
+                                  _c(
+                                    "span",
+                                    {
+                                      staticClass:
+                                        "description-text float-right"
+                                    },
+                                    [
+                                      _vm._v(
+                                        _vm._s(
+                                          _vm._f("capitalize")(
+                                            _vm.empleado_email
+                                          )
+                                        )
+                                      )
+                                    ]
+                                  )
+                                ]
+                              )
+                            ]),
+                            _vm._v(" "),
+                            _c("li", { staticClass: "nav-item" }, [
+                              _c(
+                                "a",
+                                {
+                                  staticClass: "nav-link",
+                                  attrs: { href: "#" }
+                                },
+                                [
+                                  _vm._v(
+                                    "\n                          Localidad\n                          "
+                                  ),
+                                  _c(
+                                    "span",
+                                    {
+                                      staticClass:
+                                        "description-text float-right"
+                                    },
+                                    [
+                                      _vm._v(
+                                        _vm._s(
+                                          _vm._f("capitalize")(
+                                            _vm.empleado_localidad
+                                          )
+                                        )
+                                      )
+                                    ]
+                                  )
+                                ]
+                              )
+                            ]),
+                            _vm._v(" "),
+                            _c("li", { staticClass: "nav-item" }, [
+                              _c(
+                                "a",
+                                {
+                                  staticClass: "nav-link",
+                                  attrs: { href: "#" }
+                                },
+                                [
+                                  _vm._v(
+                                    "\n                          Supervisor\n                          "
+                                  ),
+                                  _c(
+                                    "span",
+                                    {
+                                      staticClass:
+                                        "description-text float-right"
+                                    },
+                                    [
+                                      _vm._v(
+                                        _vm._s(
+                                          _vm._f("capitalize")(
+                                            _vm.empleado_supervisor
+                                          )
+                                        )
+                                      )
+                                    ]
+                                  )
+                                ]
+                              )
+                            ])
+                          ])
+                        ])
+                      ]
+                    )
+                  ])
+                ])
+              ]),
+              _vm._v(" "),
+              _c(
+                "div",
+                { staticClass: "modal-footer justify-content-between" },
+                [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-outline-danger",
+                      attrs: { type: "button", "data-dismiss": "modal" }
+                    },
+                    [_vm._v("Cerrar")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "button",
+                    {
+                      directives: [
+                        {
+                          name: "show",
+                          rawName: "v-show",
+                          value: !_vm.mostrar,
+                          expression: "!mostrar"
+                        }
+                      ],
+                      staticClass: "btn btn-outline-primary",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          $event.preventDefault()
+                          return _vm.getEmpleado($event)
+                        }
+                      }
+                    },
+                    [
+                      _c("i", { staticClass: "fas fa-search" }),
+                      _vm._v(" Buscar\n            ")
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "button",
+                    {
+                      directives: [
+                        {
+                          name: "show",
+                          rawName: "v-show",
+                          value: _vm.mostrar,
+                          expression: "mostrar"
+                        }
+                      ],
+                      staticClass: "btn btn-outline-success",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          $event.preventDefault()
+                          return _vm.postEmpleado($event)
+                        }
+                      }
+                    },
+                    [
+                      _c("i", { staticClass: "fas fa-paper-plane" }),
+                      _vm._v(" Enviar\n            ")
+                    ]
+                  )
+                ]
+              )
+            ])
+          ])
+        ]
+      )
     ])
   ])
 }
@@ -61887,7 +62409,7 @@ var staticRenderFns = [
     return _c("div", { staticClass: "modal-footer" }, [
       _c(
         "button",
-        { staticClass: "btn btn-primary", attrs: { type: "submit" } },
+        { staticClass: "btn btn-outline-success", attrs: { type: "submit" } },
         [
           _c("i", { staticClass: "fas fa-paper-plane" }),
           _vm._v(" Enviar\n                ")
@@ -61944,7 +62466,7 @@ var staticRenderFns = [
     var _c = _vm._self._c || _h
     return _c("div", { staticClass: "input-group-prepend" }, [
       _c("span", { staticClass: "input-group-text" }, [
-        _c("i", { staticClass: "fas fa-eye" })
+        _c("i", { staticClass: "fas fa-user" })
       ])
     ])
   },
@@ -61961,6 +62483,50 @@ var staticRenderFns = [
         },
         [_vm._v("Cerrar")]
       )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "modal-header" }, [
+      _c("h4", { staticClass: "modal-title" }, [
+        _vm._v("SOLICITUD DE SALIDAD")
+      ]),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "close",
+          attrs: {
+            type: "button",
+            "data-dismiss": "modal",
+            "aria-label": "Close"
+          }
+        },
+        [_c("span", { attrs: { "aria-hidden": "true" } }, [_vm._v("×")])]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c("span", { staticClass: "input-group-text" }, [
+        _c("i", { staticClass: "fas fa-user" })
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "widget-user-image" }, [
+      _c("img", {
+        staticClass: "img-circle elevation-2",
+        attrs: { src: "/img/profile/user.png", alt: "User Avatar" }
+      })
     ])
   }
 ]
