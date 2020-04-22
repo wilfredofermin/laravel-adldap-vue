@@ -27,6 +27,7 @@ Auth::routes([
 
 
 Route::post('/postIngreso', 'SolicitudController@postIngreso')->name('postIngreso');
+Route::post('/postSalida', 'SolicitudController@postSalida')->name('postSalida');
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/test', 'SolicitudController@test')->name('test');

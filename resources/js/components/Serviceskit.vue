@@ -4,15 +4,12 @@
       <!-- AQUI LOS WIDGETS -->
 
       <!-- FIN WIDGET -->
+      <!-- TABLA DE CONTENIDO -->
       <div>
         <div class="card">
           <div class="card-header">
             <h3 class="card-title">SOLICITUDES</h3>
             <div class="card-tools">
-              <!-- <button type="button" @click="MostrarModal()" class="btn btn-primary btn-sm">
-                <i class="fa fa-user-plus" aria-hidden="true"></i> Ingreso
-              </button>-->
-
               <div class="dropdown">
                 <button
                   class="btn btn-primary dropdown-toggle"
@@ -33,7 +30,7 @@
                   <button
                     class="dropdown-item btn-sm btn-block"
                     type="button"
-                    @click="modalDesahucio()"
+                    @click="getEmpleado()"
                   >
                     <i class="fa fa-user-times text-center" aria-hidden="true"></i> Desahucio
                   </button>
@@ -61,12 +58,12 @@
                 <tr
                   v-for="solicitud in db_solicitudes"
                   :key="solicitud.id "
-                  @click="modalInfo(solicitud)"
+                  @click="Informacion(solicitud)"
                 >
                   <td>{{ solicitud.serviceskit }}</td>
 
                   <td v-if="solicitud.tipo ==1">
-                    <button type="button" class="btn btn-outline-success btn-sm btn-block">Ingreso</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm btn-block">Ingreso</button>
                   </td>
                   <td v-else-if="solicitud.tipo ==2">
                     <button type="button" class="btn btn-outline-danger btn-sm btn-block">Desahucio</button>
@@ -77,7 +74,7 @@
                       class="btn btn-outline-primary btn-sm btn-block"
                     >Modificacion</button>
                   </td>
-                  <td>{{ solicitud.nombres | capitalize }} {{solicitud.apellidos | capitalize }}</td>
+                  <td>{{ solicitud.nombres | capitalize }} {{solicitud.apellidos | capitalize}}</td>
                   <td>{{ solicitud.puesto | capitalize }}</td>
                   <td v-if="solicitud.estado=='Abierto'">
                     <toggle-button
@@ -207,7 +204,6 @@
                             name="segundo_nombre"
                             placeholder="SN"
                             ref="segundo_nombre"
-                            pattern="\d*"
                             maxlength="1"
                             id="segundo_nombre"
                             class="form-control"
@@ -343,11 +339,11 @@
                         </div>
                         <input
                           v-model="form.supervisor"
-                          type="email"
+                          type="text"
                           name="supervisor"
                           id="supervisor"
                           class="form-control"
-                          placeholder="Correo Electronico de Supervisor"
+                          placeholder="El usuario del supervisor"
                           :class="{ 'is-invalid': form.errors.has('supervisor') }"
                         />
                         <has-error :form="form" field="supervisor"></has-error>
@@ -366,210 +362,164 @@
           </div>
         </div>
       </form>
-      <!-- fin modal -->
-      <!-- MODAL INFO -->
-      <div class="modal fade" id="modalInfo">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h4 class="modal-title">Detalles de la solicitud</h4>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <div class="row">
+      <!-- SALIDA EMPLEADO -->
+      <form @submit.prevent="postSalida()">
+        <div class="modal fade" id="modal-detalles">
+          <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 v-show="salida" class="modal-title">SOLICITUD DE SALIDAD</h4>
+                <h4 v-show="!salida" class="modal-title">DETALLES DEL USUARIO</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
                 <div class="col-md-12">
                   <div class="form-group">
-                    <div class="input-group mb-3">
+                    <div v-show="!mostrar" class="input-group mb-3">
                       <div class="input-group-prepend">
                         <span class="input-group-text">
                           <i class="fas fa-user"></i>
                         </span>
                       </div>
                       <input
+                        placeholder="Por favor, indique el usuario del empleado"
                         type="text"
-                        v-model="nombre_completo"
-                        name="nombre_completo"
-                        readonly
-                        ref="nombre_completo"
-                        id="nombre_completo"
+                        v-model="buscar_empleado"
+                        @keyup.enter="getEmpleado"
+                        name="buscar_empleado"
+                        ref="buscar_empleado"
+                        id="buscar_empleado"
                         class="form-control"
                       />
                     </div>
-                  </div>
-                  <!-- CEDULA -->
-                  <div class="form-group">
-                    <div class="input-group mb-3">
-                      <div class="input-group-prepend">
-                        <span class="input-group-text">
-                          <i class="fas fa-fingerprint"></i>
-                        </span>
+                    <!-- Widget: user widget style 2 -->
+                    <div v-show="mostrar" class="card card-widget widget-user-2">
+                      <!-- ---------------------------------------------------------------------------------------------------->
+                      <!-- CONDICION DEL COLOR DEL MODAL -->
+                      <!-- ---------------------------------------------------------------------------------------------------->
+                      <div
+                        class="widget-user-header"
+                        v-bind:class="salida==true ? 'bg-danger':'bg-primary'"
+                      >
+                        <div class="widget-user-image">
+                          <img
+                            class="img-circle elevation-2"
+                            src="/img/profile/user.png"
+                            alt="User Avatar"
+                          />
+                        </div>
+                        <!-- /.widget-user-image -->
+                        <h3 class="widget-user-username">{{empleado_nombre | capitalize}}</h3>
+                        <h5 class="widget-user-desc">{{empleado_puesto |capitalize}}</h5>
                       </div>
-                      <input
-                        type="text"
-                        v-model="cedula_info"
-                        name="cedula_info"
-                        readonly
-                        ref="cedula_info"
-                        id="cedula_info"
-                        class="form-control"
-                      />
-                    </div>
-                  </div>
-                  <!-- SUPERVISOR -->
-                  <div class="form-group">
-                    <div class="input-group mb-3">
-                      <div class="input-group-prepend">
-                        <span class="input-group-text">
-                          <i class="fas fa-user"></i>
-                        </span>
+                      <div class="card-footer p-0">
+                        <ul class="nav flex-column">
+                          <li class="nav-item">
+                            <a href="#" class="nav-link">
+                              <input
+                                type="text"
+                                v-model="formSalida.usuario"
+                                name="usuario"
+                                ref="usuario"
+                                hidden
+                              />
+                              Usuario
+                              <span
+                                class="description-text float-right"
+                              >{{empleado_usuario | capitalize }}</span>
+                            </a>
+                          </li>
+                          <li class="nav-item">
+                            <a href="#" class="nav-link">
+                              <input
+                                type="text"
+                                v-model="formSalida.departamento"
+                                name="departamento"
+                                ref="departamento"
+                                hidden
+                              />
+                              Departamento
+                              <span
+                                class="description-text float-right"
+                              >{{empleado_departamento | capitalize}}</span>
+                            </a>
+                          </li>
+                          <li class="nav-item">
+                            <a href="#" class="nav-link">
+                              Correo Electronico
+                              <span
+                                class="description-text float-right"
+                              >{{empleado_email | capitalize }}</span>
+                            </a>
+                          </li>
+                          <li class="nav-item">
+                            <a href="#" class="nav-link">
+                              <input
+                                type="text"
+                                v-model="formSalida.localidad"
+                                name="localidad"
+                                ref="localidad"
+                                hidden
+                              />
+                              Localidad
+                              <span
+                                class="description-text float-right"
+                              >{{empleado_localidad | capitalize}}</span>
+                            </a>
+                          </li>
+                          <li class="nav-item">
+                            <a href="#" class="nav-link">
+                              <input
+                                type="text"
+                                v-model="formSalida.supervisor"
+                                name="supervisor"
+                                ref="supervisor"
+                                hidden
+                              />
+                              Supervisor
+                              <span
+                                class="description-text float-right"
+                              >{{empleado_supervisor | capitalize}}</span>
+                            </a>
+                          </li>
+                        </ul>
                       </div>
-                      <input
-                        type="text"
-                        v-model="supervisor_info"
-                        name="supervisor_info"
-                        readonly
-                        ref="supervisor_info"
-                        id="supervisor_info"
-                        class="form-control"
-                      />
                     </div>
+                    <!-- /.widget-user -->
                   </div>
                 </div>
               </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
-            </div>
-          </div>
-          <!-- /.modal-content -->
-        </div>
-        <!-- /.modal-dialog -->
-      </div>
-      <!-- MODAL DESHAUCIO-MODIFICACION -->
-      <!-- /.modal -->
-
-      <div class="modal fade" id="modalDeshaucio">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h4 class="modal-title">SOLICITUD DE SALIDAD</h4>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <div class="col-md-12">
-                <div class="form-group">
-                  <div v-show="!mostrar" class="input-group mb-3">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">
-                        <i class="fas fa-user"></i>
-                      </span>
-                    </div>
-                    <input
-                      placeholder="Por favor, indique el usuario del empleado"
-                      type="text"
-                      v-model="buscar_empleado"
-                      @keyup.enter="getEmpleado"
-                      name="buscar_empleado"
-                      ref="buscar_empleado"
-                      id="buscar_empleado"
-                      class="form-control"
-                    />
-                  </div>
-                  <!-- Widget: user widget style 2 -->
-                  <div v-show="mostrar" class="card card-widget widget-user-2">
-                    <!-- Add the bg color to the header using any of the bg-* classes -->
-                    <div class="widget-user-header bg-primary">
-                      <div class="widget-user-image">
-                        <img
-                          class="img-circle elevation-2"
-                          src="/img/profile/user.png"
-                          alt="User Avatar"
-                        />
-                      </div>
-                      <!-- /.widget-user-image -->
-                      <h3 class="widget-user-username">{{empleado_nombre | capitalize}}</h3>
-                      <h5 class="widget-user-desc">{{empleado_puesto |capitalize}}</h5>
-                    </div>
-                    <div class="card-footer p-0">
-                      <ul class="nav flex-column">
-                        <li class="nav-item">
-                          <a href="#" class="nav-link">
-                            Usuario
-                            <span
-                              class="description-text float-right"
-                            >{{empleado_usuario | capitalize }}</span>
-                          </a>
-                        </li>
-                        <li class="nav-item">
-                          <a href="#" class="nav-link">
-                            Departamento
-                            <span
-                              class="description-text float-right"
-                            >{{empleado_departamento | capitalize}}</span>
-                          </a>
-                        </li>
-                        <li class="nav-item">
-                          <a href="#" class="nav-link">
-                            Correo Electronico
-                            <span
-                              class="description-text float-right"
-                            >{{empleado_email | capitalize }}</span>
-                          </a>
-                        </li>
-                        <li class="nav-item">
-                          <a href="#" class="nav-link">
-                            Localidad
-                            <span
-                              class="description-text float-right"
-                            >{{empleado_localidad | capitalize}}</span>
-                          </a>
-                        </li>
-                        <li class="nav-item">
-                          <a href="#" class="nav-link">
-                            Supervisor
-                            <span
-                              class="description-text float-right"
-                            >{{empleado_supervisor | capitalize}}</span>
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                  <!-- /.widget-user -->
+              <div class="modal-footer justify-content-between">
+                <button
+                  type="button"
+                  class="btn btn-outline-danger"
+                  data-dismiss="modal"
+                  @click="modalCierre()"
+                >Cerrar</button>
+                <div v-show="salida">
+                  <button
+                    v-show="!mostrar"
+                    type="button"
+                    class="btn btn-outline-primary"
+                    @click.prevent="getEmpleado"
+                  >
+                    <i class="fas fa-search"></i> Buscar
+                  </button>
+                  <button v-show="mostrar" type="submit" class="btn btn-outline-success">
+                    <i class="fas fa-paper-plane"></i> Enviar
+                  </button>
                 </div>
               </div>
             </div>
-            <div class="modal-footer justify-content-between">
-              <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Cerrar</button>
-              <button
-                v-show="!mostrar"
-                type="button"
-                class="btn btn-outline-primary"
-                @click.prevent="getEmpleado"
-              >
-                <i class="fas fa-search"></i> Buscar
-              </button>
-              <button
-                v-show="mostrar"
-                type="button"
-                class="btn btn-outline-success"
-                @click.prevent="postEmpleado"
-              >
-                <i class="fas fa-paper-plane"></i> Enviar
-              </button>
-            </div>
+            <!-- /.modal-content -->
           </div>
-          <!-- /.modal-content -->
+          <!-- /.modal-dialog -->
         </div>
-        <!-- /.modal-dialog -->
-      </div>
-      <!-- /.modal -->
-
-      <!-- FIN MODAL DESHUCION -->
+        <!-- FIN MODAL DESHUCION -->
+      </form>
+      <!-- FIN MODAL SALIDAD -->
     </div>
   </div>
 </template>
@@ -581,6 +531,7 @@ export default {
       activo: false,
       // Cuando inicia oculta los demas input en el modal Desahucio
       mostrar: false,
+      salida: false,
       //   dynamicValue: false,
       db_solicitudes: {},
       db_empleados: {},
@@ -598,7 +549,7 @@ export default {
       empleado_departamento: null,
       empleado_localidad: null,
       empleado_puesto: null,
-      cedula_info: null,
+      identidad_info: null,
       supervisor_info: null,
       form: new Form({
         cedula: "",
@@ -612,12 +563,14 @@ export default {
         supervisor: ""
       }),
       formSalida: new Form({
-        Nombres: "",
-        Puesto: "",
-        usuaio: "",
-        departamento: "",
-        localidad: "",
-        supervisor: ""
+        salida_usuaio: "",
+        salida_Nombres: "",
+        salida_apellidos: "",
+        salida_apellidos: "",
+        salida_Puesto: "",
+        salida_departamento: "",
+        salida_localidad: "",
+        salida_supervisor: ""
       })
     };
   },
@@ -655,25 +608,67 @@ export default {
         });
     },
     // VENTANA MODAL - MODAL DE INFORMACION
-    modalInfo: function(solicitud) {
-      $("#modalInfo").modal("show");
-      axios.get("/infoSolicitud/" + solicitud.id).then(response => {
-        this.nombre_completo =
-          response.data.nombres + " " + response.data.apellidos;
+    Informacion: function(solicitud) {
+      this.mostrar = true;
+      this.salida = false;
+      this.modalDetalles();
 
-        this.cedula_info = response.data.cedula;
-        this.supervisor_info = response.data.supervisor_email;
-      });
+      // NOMBRE COMPLETO
+      this.empleado_nombre = solicitud.nombre_completo;
+      // IDENTIDAD
+      this.empleado_usuario = solicitud.identidad;
+      // DEPARTAMENTO
+      this.empleado_departamento = solicitud.departamento;
+      // PUESTO
+      this.empleado_puesto = solicitud.puesto;
+      // LOCALIDAD
+      this.empleado_localidad = solicitud.localidad;
+      // EMAIL
+      this.empleado_email = solicitud.correo_electronico;
+      // SUPERVISOR
+      this.empleado_supervisor = solicitud.supervisor;
+
+      // axios.get("/infoSolicitud/" + solicitud.id).then(response => {
+      //   this.nombre_completo =
+      //     response.data.nombres + " " + response.data.apellidos;
+
+      //   this.identidad_info = response.data.identidad;
+      //   this.supervisor_info = response.data.supervisor_email;
+      // });
     },
 
-    modalDesahucio: function() {
-      $("#modalDeshaucio").modal("show");
+    modalDetalles: function() {
+      $("#modal-detalles").modal("show");
+      // NOMBRE COMPLETO
+      this.empleado_nombre = null;
+      // IDENTIDAD
+      this.empleado_usuario = null;
+      // DEPARTAMENTO
+      this.empleado_departamento = null;
+      // PUESTO
+      this.empleado_puesto = null;
+      // LOCALIDAD
+      this.empleado_localidad = null;
+      // EMAIL
+      this.empleado_email = null;
+      // SUPERVISOR
+      this.empleado_supervisor = null;
     },
+    modalCierre() {
+      this.salida = false;
+      this.buscar_empleado = null;
+    },
+
     // ----------------------------------------------------------------------------
     // PETICIONES AL ACTIVE DIRECTORY
     // ----------------------------------------------------------------------------
     getEmpleado() {
-      if (this.buscar_empleado != "") {
+      this.salida = true;
+      this.mostrar = false;
+      this.detalles = true;
+      this.modalDetalles();
+
+      if (this.buscar_empleado != null) {
         let buscar = this.buscar_empleado;
         axios
           .get("/getEmpleado?q=" + buscar)
@@ -683,26 +678,31 @@ export default {
             this.mostrar = true;
 
             this.db_empleados = response.data;
-            // NOMBRES
+            // NOMBRES COMPLEETO
             this.empleado_nombre = response.data.name;
+
+            // NOMBRES
+            this.formSalida.salida_Nombres = response.data.givenname;
+            // APELLIDOS
+            this.formSalida.salida_Nombres = response.data.sn;
             // USUARIO
             this.empleado_usuario = response.data.samaccountname;
+            this.formSalida.salida_usuaio = response.data.samaccountname;
             // DEPARTAMENTO
             this.empleado_departamento = response.data.department;
+            this.formSalida.salida_departamento = response.data.department;
             // PUESTO
             this.empleado_puesto = response.data.description;
+            this.formSalida.salida_Puesto = response.data.description;
             // LOCALIDAD
             this.empleado_localidad = response.data.physicaldeliveryofficename;
+            this.formSalida.salida_localidad =
+              response.data.physicaldeliveryofficename;
             // EMAIL
             this.empleado_email = response.data.userprincipalname;
             // SUPERVISOR
             this.empleado_supervisor = response.data.manager;
-
-            // this.empleado_supervisor.slice(-2);
-            // this.sections.splice(index, 1)
-
-            // months.splice(1, 0, 'Feb');
-            // value.replace(/[^a-zA-Z0-9@]+/, '')
+            this.formSalida.salida_supervisor = response.data.manager;
 
             this.$Progress.finish();
           })
@@ -710,6 +710,9 @@ export default {
             console.log(e);
           });
       }
+    },
+    postSalida() {
+      console.log("estas en postSalida");
     },
     // ----------------------------------------------------------------------------
 

@@ -1925,56 +1925,8 @@ module.exports = {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 //
 //
 //
@@ -2503,10 +2455,13 @@ __webpack_require__.r(__webpack_exports__);
 //
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
+    var _Form;
+
     return {
       activo: false,
       // Cuando inicia oculta los demas input en el modal Desahucio
       mostrar: false,
+      salida: false,
       //   dynamicValue: false,
       db_solicitudes: {},
       db_empleados: {},
@@ -2524,7 +2479,7 @@ __webpack_require__.r(__webpack_exports__);
       empleado_departamento: null,
       empleado_localidad: null,
       empleado_puesto: null,
-      cedula_info: null,
+      identidad_info: null,
       supervisor_info: null,
       form: new Form({
         cedula: "",
@@ -2536,7 +2491,12 @@ __webpack_require__.r(__webpack_exports__);
         puesto: "",
         localidad: "",
         supervisor: ""
-      })
+      }),
+      formSalida: new Form((_Form = {
+        salida_usuaio: "",
+        salida_Nombres: "",
+        salida_apellidos: ""
+      }, _defineProperty(_Form, "salida_apellidos", ""), _defineProperty(_Form, "salida_Puesto", ""), _defineProperty(_Form, "salida_departamento", ""), _defineProperty(_Form, "salida_localidad", ""), _defineProperty(_Form, "salida_supervisor", ""), _Form))
     };
   },
   methods: {
@@ -2572,74 +2532,120 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     // VENTANA MODAL - MODAL DE INFORMACION
-    modalInfo: function modalInfo(solicitud) {
-      var _this2 = this;
+    Informacion: function Informacion(solicitud) {
+      this.mostrar = true;
+      this.salida = false;
+      this.modalDetalles(); // NOMBRE COMPLETO
 
-      $("#modalInfo").modal("show");
-      axios.get("/infoSolicitud/" + solicitud.id).then(function (response) {
-        _this2.nombre_completo = response.data.nombres + " " + response.data.apellidos;
-        _this2.cedula_info = response.data.cedula;
-        _this2.supervisor_info = response.data.supervisor_email;
-      });
+      this.empleado_nombre = solicitud.nombre_completo; // IDENTIDAD
+
+      this.empleado_usuario = solicitud.identidad; // DEPARTAMENTO
+
+      this.empleado_departamento = solicitud.departamento; // PUESTO
+
+      this.empleado_puesto = solicitud.puesto; // LOCALIDAD
+
+      this.empleado_localidad = solicitud.localidad; // EMAIL
+
+      this.empleado_email = solicitud.correo_electronico; // SUPERVISOR
+
+      this.empleado_supervisor = solicitud.supervisor; // axios.get("/infoSolicitud/" + solicitud.id).then(response => {
+      //   this.nombre_completo =
+      //     response.data.nombres + " " + response.data.apellidos;
+      //   this.identidad_info = response.data.identidad;
+      //   this.supervisor_info = response.data.supervisor_email;
+      // });
     },
-    modalDesahucio: function modalDesahucio() {
-      $("#modalDeshaucio").modal("show");
+    modalDetalles: function modalDetalles() {
+      $("#modal-detalles").modal("show"); // NOMBRE COMPLETO
+
+      this.empleado_nombre = null; // IDENTIDAD
+
+      this.empleado_usuario = null; // DEPARTAMENTO
+
+      this.empleado_departamento = null; // PUESTO
+
+      this.empleado_puesto = null; // LOCALIDAD
+
+      this.empleado_localidad = null; // EMAIL
+
+      this.empleado_email = null; // SUPERVISOR
+
+      this.empleado_supervisor = null;
+    },
+    modalCierre: function modalCierre() {
+      this.salida = false;
+      this.buscar_empleado = null;
     },
     // ----------------------------------------------------------------------------
     // PETICIONES AL ACTIVE DIRECTORY
     // ----------------------------------------------------------------------------
     getEmpleado: function getEmpleado() {
-      var _this3 = this;
+      var _this2 = this;
 
-      if (this.buscar_empleado != "") {
+      this.salida = true;
+      this.mostrar = false;
+      this.detalles = true;
+      this.modalDetalles();
+
+      if (this.buscar_empleado != null) {
         var buscar = this.buscar_empleado;
         axios.get("/getEmpleado?q=" + buscar).then(function (response) {
-          _this3.$Progress.start(); // console.log((this.db_empleados = response.data.description));
+          _this2.$Progress.start(); // console.log((this.db_empleados = response.data.description));
 
 
-          _this3.mostrar = true;
-          _this3.db_empleados = response.data; // NOMBRES
+          _this2.mostrar = true;
+          _this2.db_empleados = response.data; // NOMBRES COMPLEETO
 
-          _this3.empleado_nombre = response.data.name; // USUARIO
+          _this2.empleado_nombre = response.data.name; // NOMBRES
 
-          _this3.empleado_usuario = response.data.samaccountname; // DEPARTAMENTO
+          _this2.formSalida.salida_Nombres = response.data.givenname; // APELLIDOS
 
-          _this3.empleado_departamento = response.data.department; // PUESTO
+          _this2.formSalida.salida_Nombres = response.data.sn; // USUARIO
 
-          _this3.empleado_puesto = response.data.description; // LOCALIDAD
+          _this2.empleado_usuario = response.data.samaccountname;
+          _this2.formSalida.salida_usuaio = response.data.samaccountname; // DEPARTAMENTO
 
-          _this3.empleado_localidad = response.data.physicaldeliveryofficename; // EMAIL
+          _this2.empleado_departamento = response.data.department;
+          _this2.formSalida.salida_departamento = response.data.department; // PUESTO
 
-          _this3.empleado_email = response.data.userprincipalname; // SUPERVISOR
+          _this2.empleado_puesto = response.data.description;
+          _this2.formSalida.salida_Puesto = response.data.description; // LOCALIDAD
 
-          _this3.empleado_supervisor = response.data.manager; // this.empleado_supervisor.slice(-2);
-          // this.sections.splice(index, 1)
-          // months.splice(1, 0, 'Feb');
-          // value.replace(/[^a-zA-Z0-9@]+/, '')
+          _this2.empleado_localidad = response.data.physicaldeliveryofficename;
+          _this2.formSalida.salida_localidad = response.data.physicaldeliveryofficename; // EMAIL
 
-          _this3.$Progress.finish();
+          _this2.empleado_email = response.data.userprincipalname; // SUPERVISOR
+
+          _this2.empleado_supervisor = response.data.manager;
+          _this2.formSalida.salida_supervisor = response.data.manager;
+
+          _this2.$Progress.finish();
         })["catch"](function (e) {
           console.log(e);
         });
       }
     },
+    postSalida: function postSalida() {
+      console.log("estas en postSalida");
+    },
     // ----------------------------------------------------------------------------
     getSolicitudes: function getSolicitudes() {
-      var _this4 = this;
+      var _this3 = this;
 
       axios.get("/getSolicitudes").then(function (response) {
-        _this4.db_solicitudes = response.data;
+        _this3.db_solicitudes = response.data;
       });
     },
     getDepartamentos: function getDepartamentos() {
-      var _this5 = this;
+      var _this4 = this;
 
       axios.get("/getDepartamentos").then(function (response) {
-        _this5.data_departamentos = response.data;
+        _this4.data_departamentos = response.data;
       });
     },
     getPuestos: function getPuestos() {
-      var _this6 = this;
+      var _this5 = this;
 
       this.form.puesto = "";
 
@@ -2649,7 +2655,7 @@ __webpack_require__.r(__webpack_exports__);
             departamento_id: this.form.departamento
           }
         }).then(function (response) {
-          _this6.data_puestos = response.data;
+          _this5.data_puestos = response.data;
           document.getElementById("puesto").disabled = false;
         })["catch"](function (e) {
           console.log(e);
@@ -2660,23 +2666,23 @@ __webpack_require__.r(__webpack_exports__);
       document.getElementById("supervisor").disabled = false;
     },
     getLocalidad: function getLocalidad() {
-      var _this7 = this;
+      var _this6 = this;
 
       this.form.localidad = "";
       axios.get("/getLocalidad").then(function (response) {
-        _this7.data_localidad = response.data;
+        _this6.data_localidad = response.data;
         document.getElementById("localidad").disabled = false;
       });
     }
   },
   created: function created() {
-    var _this8 = this;
+    var _this7 = this;
 
     this.$Progress.start();
     this.getSolicitudes();
     this.getDepartamentos();
     Fire.$on("RecargarData", function () {
-      _this8.getSolicitudes();
+      _this7.getSolicitudes();
     });
     this.$Progress.finish();
   },
@@ -60989,7 +60995,7 @@ var render = function() {
                         attrs: { type: "button" },
                         on: {
                           click: function($event) {
-                            return _vm.modalDesahucio()
+                            return _vm.getEmpleado()
                           }
                         }
                       },
@@ -61022,7 +61028,7 @@ var render = function() {
                       key: solicitud.id,
                       on: {
                         click: function($event) {
-                          return _vm.modalInfo(solicitud)
+                          return _vm.Informacion(solicitud)
                         }
                       }
                     },
@@ -61035,7 +61041,7 @@ var render = function() {
                               "button",
                               {
                                 staticClass:
-                                  "btn btn-outline-success btn-sm btn-block",
+                                  "btn btn-outline-primary btn-sm btn-block",
                                 attrs: { type: "button" }
                               },
                               [_vm._v("Ingreso")]
@@ -61345,7 +61351,6 @@ var render = function() {
                                       type: "text",
                                       name: "segundo_nombre",
                                       placeholder: "SN",
-                                      pattern: "\\d*",
                                       maxlength: "1",
                                       id: "segundo_nombre"
                                     },
@@ -61787,11 +61792,10 @@ var render = function() {
                                     )
                                   },
                                   attrs: {
-                                    type: "email",
+                                    type: "text",
                                     name: "supervisor",
                                     id: "supervisor",
-                                    placeholder:
-                                      "Correo Electronico de Supervisor"
+                                    placeholder: "El usuario del supervisor"
                                   },
                                   domProps: { value: _vm.form.supervisor },
                                   on: {
@@ -61828,467 +61832,559 @@ var render = function() {
         ]
       ),
       _vm._v(" "),
-      _c("div", { staticClass: "modal fade", attrs: { id: "modalInfo" } }, [
-        _c("div", { staticClass: "modal-dialog modal-lg" }, [
-          _c("div", { staticClass: "modal-content" }, [
-            _vm._m(9),
-            _vm._v(" "),
-            _c("div", { staticClass: "modal-body" }, [
-              _c("div", { staticClass: "row" }, [
-                _c("div", { staticClass: "col-md-12" }, [
-                  _c("div", { staticClass: "form-group" }, [
-                    _c("div", { staticClass: "input-group mb-3" }, [
-                      _vm._m(10),
-                      _vm._v(" "),
-                      _c("input", {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.nombre_completo,
-                            expression: "nombre_completo"
-                          }
-                        ],
-                        ref: "nombre_completo",
-                        staticClass: "form-control",
-                        attrs: {
-                          type: "text",
-                          name: "nombre_completo",
-                          readonly: "",
-                          id: "nombre_completo"
-                        },
-                        domProps: { value: _vm.nombre_completo },
-                        on: {
-                          input: function($event) {
-                            if ($event.target.composing) {
-                              return
-                            }
-                            _vm.nombre_completo = $event.target.value
-                          }
-                        }
-                      })
-                    ])
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "form-group" }, [
-                    _c("div", { staticClass: "input-group mb-3" }, [
-                      _vm._m(11),
-                      _vm._v(" "),
-                      _c("input", {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.cedula_info,
-                            expression: "cedula_info"
-                          }
-                        ],
-                        ref: "cedula_info",
-                        staticClass: "form-control",
-                        attrs: {
-                          type: "text",
-                          name: "cedula_info",
-                          readonly: "",
-                          id: "cedula_info"
-                        },
-                        domProps: { value: _vm.cedula_info },
-                        on: {
-                          input: function($event) {
-                            if ($event.target.composing) {
-                              return
-                            }
-                            _vm.cedula_info = $event.target.value
-                          }
-                        }
-                      })
-                    ])
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "form-group" }, [
-                    _c("div", { staticClass: "input-group mb-3" }, [
-                      _vm._m(12),
-                      _vm._v(" "),
-                      _c("input", {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.supervisor_info,
-                            expression: "supervisor_info"
-                          }
-                        ],
-                        ref: "supervisor_info",
-                        staticClass: "form-control",
-                        attrs: {
-                          type: "text",
-                          name: "supervisor_info",
-                          readonly: "",
-                          id: "supervisor_info"
-                        },
-                        domProps: { value: _vm.supervisor_info },
-                        on: {
-                          input: function($event) {
-                            if ($event.target.composing) {
-                              return
-                            }
-                            _vm.supervisor_info = $event.target.value
-                          }
-                        }
-                      })
-                    ])
-                  ])
-                ])
-              ])
-            ]),
-            _vm._v(" "),
-            _vm._m(13)
-          ])
-        ])
-      ]),
-      _vm._v(" "),
       _c(
-        "div",
-        { staticClass: "modal fade", attrs: { id: "modalDeshaucio" } },
+        "form",
+        {
+          on: {
+            submit: function($event) {
+              $event.preventDefault()
+              return _vm.postSalida()
+            }
+          }
+        },
         [
-          _c("div", { staticClass: "modal-dialog modal-lg" }, [
-            _c("div", { staticClass: "modal-content" }, [
-              _vm._m(14),
-              _vm._v(" "),
-              _c("div", { staticClass: "modal-body" }, [
-                _c("div", { staticClass: "col-md-12" }, [
-                  _c("div", { staticClass: "form-group" }, [
-                    _c(
-                      "div",
-                      {
-                        directives: [
-                          {
-                            name: "show",
-                            rawName: "v-show",
-                            value: !_vm.mostrar,
-                            expression: "!mostrar"
-                          }
-                        ],
-                        staticClass: "input-group mb-3"
-                      },
-                      [
-                        _vm._m(15),
-                        _vm._v(" "),
-                        _c("input", {
+          _c(
+            "div",
+            { staticClass: "modal fade", attrs: { id: "modal-detalles" } },
+            [
+              _c(
+                "div",
+                { staticClass: "modal-dialog modal-dialog-centered modal-lg" },
+                [
+                  _c("div", { staticClass: "modal-content" }, [
+                    _c("div", { staticClass: "modal-header" }, [
+                      _c(
+                        "h4",
+                        {
                           directives: [
                             {
-                              name: "model",
-                              rawName: "v-model",
-                              value: _vm.buscar_empleado,
-                              expression: "buscar_empleado"
+                              name: "show",
+                              rawName: "v-show",
+                              value: _vm.salida,
+                              expression: "salida"
                             }
                           ],
-                          ref: "buscar_empleado",
-                          staticClass: "form-control",
-                          attrs: {
-                            placeholder:
-                              "Por favor, indique el usuario del empleado",
-                            type: "text",
-                            name: "buscar_empleado",
-                            id: "buscar_empleado"
-                          },
-                          domProps: { value: _vm.buscar_empleado },
-                          on: {
-                            keyup: function($event) {
-                              if (
-                                !$event.type.indexOf("key") &&
-                                _vm._k(
-                                  $event.keyCode,
-                                  "enter",
-                                  13,
-                                  $event.key,
-                                  "Enter"
-                                )
-                              ) {
-                                return null
-                              }
-                              return _vm.getEmpleado($event)
-                            },
-                            input: function($event) {
-                              if ($event.target.composing) {
-                                return
-                              }
-                              _vm.buscar_empleado = $event.target.value
+                          staticClass: "modal-title"
+                        },
+                        [_vm._v("SOLICITUD DE SALIDAD")]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "h4",
+                        {
+                          directives: [
+                            {
+                              name: "show",
+                              rawName: "v-show",
+                              value: !_vm.salida,
+                              expression: "!salida"
                             }
-                          }
-                        })
-                      ]
-                    ),
+                          ],
+                          staticClass: "modal-title"
+                        },
+                        [_vm._v("DETALLES DEL USUARIO")]
+                      ),
+                      _vm._v(" "),
+                      _vm._m(9)
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "modal-body" }, [
+                      _c("div", { staticClass: "col-md-12" }, [
+                        _c("div", { staticClass: "form-group" }, [
+                          _c(
+                            "div",
+                            {
+                              directives: [
+                                {
+                                  name: "show",
+                                  rawName: "v-show",
+                                  value: !_vm.mostrar,
+                                  expression: "!mostrar"
+                                }
+                              ],
+                              staticClass: "input-group mb-3"
+                            },
+                            [
+                              _vm._m(10),
+                              _vm._v(" "),
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value: _vm.buscar_empleado,
+                                    expression: "buscar_empleado"
+                                  }
+                                ],
+                                ref: "buscar_empleado",
+                                staticClass: "form-control",
+                                attrs: {
+                                  placeholder:
+                                    "Por favor, indique el usuario del empleado",
+                                  type: "text",
+                                  name: "buscar_empleado",
+                                  id: "buscar_empleado"
+                                },
+                                domProps: { value: _vm.buscar_empleado },
+                                on: {
+                                  keyup: function($event) {
+                                    if (
+                                      !$event.type.indexOf("key") &&
+                                      _vm._k(
+                                        $event.keyCode,
+                                        "enter",
+                                        13,
+                                        $event.key,
+                                        "Enter"
+                                      )
+                                    ) {
+                                      return null
+                                    }
+                                    return _vm.getEmpleado($event)
+                                  },
+                                  input: function($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.buscar_empleado = $event.target.value
+                                  }
+                                }
+                              })
+                            ]
+                          ),
+                          _vm._v(" "),
+                          _c(
+                            "div",
+                            {
+                              directives: [
+                                {
+                                  name: "show",
+                                  rawName: "v-show",
+                                  value: _vm.mostrar,
+                                  expression: "mostrar"
+                                }
+                              ],
+                              staticClass: "card card-widget widget-user-2"
+                            },
+                            [
+                              _c(
+                                "div",
+                                {
+                                  staticClass: "widget-user-header",
+                                  class:
+                                    _vm.salida == true
+                                      ? "bg-danger"
+                                      : "bg-primary"
+                                },
+                                [
+                                  _vm._m(11),
+                                  _vm._v(" "),
+                                  _c(
+                                    "h3",
+                                    { staticClass: "widget-user-username" },
+                                    [
+                                      _vm._v(
+                                        _vm._s(
+                                          _vm._f("capitalize")(
+                                            _vm.empleado_nombre
+                                          )
+                                        )
+                                      )
+                                    ]
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "h5",
+                                    { staticClass: "widget-user-desc" },
+                                    [
+                                      _vm._v(
+                                        _vm._s(
+                                          _vm._f("capitalize")(
+                                            _vm.empleado_puesto
+                                          )
+                                        )
+                                      )
+                                    ]
+                                  )
+                                ]
+                              ),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "card-footer p-0" }, [
+                                _c("ul", { staticClass: "nav flex-column" }, [
+                                  _c("li", { staticClass: "nav-item" }, [
+                                    _c(
+                                      "a",
+                                      {
+                                        staticClass: "nav-link",
+                                        attrs: { href: "#" }
+                                      },
+                                      [
+                                        _c("input", {
+                                          directives: [
+                                            {
+                                              name: "model",
+                                              rawName: "v-model",
+                                              value: _vm.formSalida.usuario,
+                                              expression: "formSalida.usuario"
+                                            }
+                                          ],
+                                          ref: "usuario",
+                                          attrs: {
+                                            type: "text",
+                                            name: "usuario",
+                                            hidden: ""
+                                          },
+                                          domProps: {
+                                            value: _vm.formSalida.usuario
+                                          },
+                                          on: {
+                                            input: function($event) {
+                                              if ($event.target.composing) {
+                                                return
+                                              }
+                                              _vm.$set(
+                                                _vm.formSalida,
+                                                "usuario",
+                                                $event.target.value
+                                              )
+                                            }
+                                          }
+                                        }),
+                                        _vm._v(
+                                          "\n                            Usuario\n                            "
+                                        ),
+                                        _c(
+                                          "span",
+                                          {
+                                            staticClass:
+                                              "description-text float-right"
+                                          },
+                                          [
+                                            _vm._v(
+                                              _vm._s(
+                                                _vm._f("capitalize")(
+                                                  _vm.empleado_usuario
+                                                )
+                                              )
+                                            )
+                                          ]
+                                        )
+                                      ]
+                                    )
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("li", { staticClass: "nav-item" }, [
+                                    _c(
+                                      "a",
+                                      {
+                                        staticClass: "nav-link",
+                                        attrs: { href: "#" }
+                                      },
+                                      [
+                                        _c("input", {
+                                          directives: [
+                                            {
+                                              name: "model",
+                                              rawName: "v-model",
+                                              value:
+                                                _vm.formSalida.departamento,
+                                              expression:
+                                                "formSalida.departamento"
+                                            }
+                                          ],
+                                          ref: "departamento",
+                                          attrs: {
+                                            type: "text",
+                                            name: "departamento",
+                                            hidden: ""
+                                          },
+                                          domProps: {
+                                            value: _vm.formSalida.departamento
+                                          },
+                                          on: {
+                                            input: function($event) {
+                                              if ($event.target.composing) {
+                                                return
+                                              }
+                                              _vm.$set(
+                                                _vm.formSalida,
+                                                "departamento",
+                                                $event.target.value
+                                              )
+                                            }
+                                          }
+                                        }),
+                                        _vm._v(
+                                          "\n                            Departamento\n                            "
+                                        ),
+                                        _c(
+                                          "span",
+                                          {
+                                            staticClass:
+                                              "description-text float-right"
+                                          },
+                                          [
+                                            _vm._v(
+                                              _vm._s(
+                                                _vm._f("capitalize")(
+                                                  _vm.empleado_departamento
+                                                )
+                                              )
+                                            )
+                                          ]
+                                        )
+                                      ]
+                                    )
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("li", { staticClass: "nav-item" }, [
+                                    _c(
+                                      "a",
+                                      {
+                                        staticClass: "nav-link",
+                                        attrs: { href: "#" }
+                                      },
+                                      [
+                                        _vm._v(
+                                          "\n                            Correo Electronico\n                            "
+                                        ),
+                                        _c(
+                                          "span",
+                                          {
+                                            staticClass:
+                                              "description-text float-right"
+                                          },
+                                          [
+                                            _vm._v(
+                                              _vm._s(
+                                                _vm._f("capitalize")(
+                                                  _vm.empleado_email
+                                                )
+                                              )
+                                            )
+                                          ]
+                                        )
+                                      ]
+                                    )
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("li", { staticClass: "nav-item" }, [
+                                    _c(
+                                      "a",
+                                      {
+                                        staticClass: "nav-link",
+                                        attrs: { href: "#" }
+                                      },
+                                      [
+                                        _c("input", {
+                                          directives: [
+                                            {
+                                              name: "model",
+                                              rawName: "v-model",
+                                              value: _vm.formSalida.localidad,
+                                              expression: "formSalida.localidad"
+                                            }
+                                          ],
+                                          ref: "localidad",
+                                          attrs: {
+                                            type: "text",
+                                            name: "localidad",
+                                            hidden: ""
+                                          },
+                                          domProps: {
+                                            value: _vm.formSalida.localidad
+                                          },
+                                          on: {
+                                            input: function($event) {
+                                              if ($event.target.composing) {
+                                                return
+                                              }
+                                              _vm.$set(
+                                                _vm.formSalida,
+                                                "localidad",
+                                                $event.target.value
+                                              )
+                                            }
+                                          }
+                                        }),
+                                        _vm._v(
+                                          "\n                            Localidad\n                            "
+                                        ),
+                                        _c(
+                                          "span",
+                                          {
+                                            staticClass:
+                                              "description-text float-right"
+                                          },
+                                          [
+                                            _vm._v(
+                                              _vm._s(
+                                                _vm._f("capitalize")(
+                                                  _vm.empleado_localidad
+                                                )
+                                              )
+                                            )
+                                          ]
+                                        )
+                                      ]
+                                    )
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("li", { staticClass: "nav-item" }, [
+                                    _c(
+                                      "a",
+                                      {
+                                        staticClass: "nav-link",
+                                        attrs: { href: "#" }
+                                      },
+                                      [
+                                        _c("input", {
+                                          directives: [
+                                            {
+                                              name: "model",
+                                              rawName: "v-model",
+                                              value: _vm.formSalida.supervisor,
+                                              expression:
+                                                "formSalida.supervisor"
+                                            }
+                                          ],
+                                          ref: "supervisor",
+                                          attrs: {
+                                            type: "text",
+                                            name: "supervisor",
+                                            hidden: ""
+                                          },
+                                          domProps: {
+                                            value: _vm.formSalida.supervisor
+                                          },
+                                          on: {
+                                            input: function($event) {
+                                              if ($event.target.composing) {
+                                                return
+                                              }
+                                              _vm.$set(
+                                                _vm.formSalida,
+                                                "supervisor",
+                                                $event.target.value
+                                              )
+                                            }
+                                          }
+                                        }),
+                                        _vm._v(
+                                          "\n                            Supervisor\n                            "
+                                        ),
+                                        _c(
+                                          "span",
+                                          {
+                                            staticClass:
+                                              "description-text float-right"
+                                          },
+                                          [
+                                            _vm._v(
+                                              _vm._s(
+                                                _vm._f("capitalize")(
+                                                  _vm.empleado_supervisor
+                                                )
+                                              )
+                                            )
+                                          ]
+                                        )
+                                      ]
+                                    )
+                                  ])
+                                ])
+                              ])
+                            ]
+                          )
+                        ])
+                      ])
+                    ]),
                     _vm._v(" "),
                     _c(
                       "div",
-                      {
-                        directives: [
-                          {
-                            name: "show",
-                            rawName: "v-show",
-                            value: _vm.mostrar,
-                            expression: "mostrar"
-                          }
-                        ],
-                        staticClass: "card card-widget widget-user-2"
-                      },
+                      { staticClass: "modal-footer justify-content-between" },
                       [
                         _c(
-                          "div",
-                          { staticClass: "widget-user-header bg-primary" },
-                          [
-                            _vm._m(16),
-                            _vm._v(" "),
-                            _c("h3", { staticClass: "widget-user-username" }, [
-                              _vm._v(
-                                _vm._s(
-                                  _vm._f("capitalize")(_vm.empleado_nombre)
-                                )
-                              )
-                            ]),
-                            _vm._v(" "),
-                            _c("h5", { staticClass: "widget-user-desc" }, [
-                              _vm._v(
-                                _vm._s(
-                                  _vm._f("capitalize")(_vm.empleado_puesto)
-                                )
-                              )
-                            ])
-                          ]
+                          "button",
+                          {
+                            staticClass: "btn btn-outline-danger",
+                            attrs: { type: "button", "data-dismiss": "modal" },
+                            on: {
+                              click: function($event) {
+                                return _vm.modalCierre()
+                              }
+                            }
+                          },
+                          [_vm._v("Cerrar")]
                         ),
                         _vm._v(" "),
-                        _c("div", { staticClass: "card-footer p-0" }, [
-                          _c("ul", { staticClass: "nav flex-column" }, [
-                            _c("li", { staticClass: "nav-item" }, [
-                              _c(
-                                "a",
-                                {
-                                  staticClass: "nav-link",
-                                  attrs: { href: "#" }
-                                },
-                                [
-                                  _vm._v(
-                                    "\n                          Usuario\n                          "
-                                  ),
-                                  _c(
-                                    "span",
-                                    {
-                                      staticClass:
-                                        "description-text float-right"
-                                    },
-                                    [
-                                      _vm._v(
-                                        _vm._s(
-                                          _vm._f("capitalize")(
-                                            _vm.empleado_usuario
-                                          )
-                                        )
-                                      )
-                                    ]
-                                  )
-                                ]
-                              )
-                            ]),
+                        _c(
+                          "div",
+                          {
+                            directives: [
+                              {
+                                name: "show",
+                                rawName: "v-show",
+                                value: _vm.salida,
+                                expression: "salida"
+                              }
+                            ]
+                          },
+                          [
+                            _c(
+                              "button",
+                              {
+                                directives: [
+                                  {
+                                    name: "show",
+                                    rawName: "v-show",
+                                    value: !_vm.mostrar,
+                                    expression: "!mostrar"
+                                  }
+                                ],
+                                staticClass: "btn btn-outline-primary",
+                                attrs: { type: "button" },
+                                on: {
+                                  click: function($event) {
+                                    $event.preventDefault()
+                                    return _vm.getEmpleado($event)
+                                  }
+                                }
+                              },
+                              [
+                                _c("i", { staticClass: "fas fa-search" }),
+                                _vm._v(" Buscar\n                ")
+                              ]
+                            ),
                             _vm._v(" "),
-                            _c("li", { staticClass: "nav-item" }, [
-                              _c(
-                                "a",
-                                {
-                                  staticClass: "nav-link",
-                                  attrs: { href: "#" }
-                                },
-                                [
-                                  _vm._v(
-                                    "\n                          Departamento\n                          "
-                                  ),
-                                  _c(
-                                    "span",
-                                    {
-                                      staticClass:
-                                        "description-text float-right"
-                                    },
-                                    [
-                                      _vm._v(
-                                        _vm._s(
-                                          _vm._f("capitalize")(
-                                            _vm.empleado_departamento
-                                          )
-                                        )
-                                      )
-                                    ]
-                                  )
-                                ]
-                              )
-                            ]),
-                            _vm._v(" "),
-                            _c("li", { staticClass: "nav-item" }, [
-                              _c(
-                                "a",
-                                {
-                                  staticClass: "nav-link",
-                                  attrs: { href: "#" }
-                                },
-                                [
-                                  _vm._v(
-                                    "\n                          Correo Electronico\n                          "
-                                  ),
-                                  _c(
-                                    "span",
-                                    {
-                                      staticClass:
-                                        "description-text float-right"
-                                    },
-                                    [
-                                      _vm._v(
-                                        _vm._s(
-                                          _vm._f("capitalize")(
-                                            _vm.empleado_email
-                                          )
-                                        )
-                                      )
-                                    ]
-                                  )
-                                ]
-                              )
-                            ]),
-                            _vm._v(" "),
-                            _c("li", { staticClass: "nav-item" }, [
-                              _c(
-                                "a",
-                                {
-                                  staticClass: "nav-link",
-                                  attrs: { href: "#" }
-                                },
-                                [
-                                  _vm._v(
-                                    "\n                          Localidad\n                          "
-                                  ),
-                                  _c(
-                                    "span",
-                                    {
-                                      staticClass:
-                                        "description-text float-right"
-                                    },
-                                    [
-                                      _vm._v(
-                                        _vm._s(
-                                          _vm._f("capitalize")(
-                                            _vm.empleado_localidad
-                                          )
-                                        )
-                                      )
-                                    ]
-                                  )
-                                ]
-                              )
-                            ]),
-                            _vm._v(" "),
-                            _c("li", { staticClass: "nav-item" }, [
-                              _c(
-                                "a",
-                                {
-                                  staticClass: "nav-link",
-                                  attrs: { href: "#" }
-                                },
-                                [
-                                  _vm._v(
-                                    "\n                          Supervisor\n                          "
-                                  ),
-                                  _c(
-                                    "span",
-                                    {
-                                      staticClass:
-                                        "description-text float-right"
-                                    },
-                                    [
-                                      _vm._v(
-                                        _vm._s(
-                                          _vm._f("capitalize")(
-                                            _vm.empleado_supervisor
-                                          )
-                                        )
-                                      )
-                                    ]
-                                  )
-                                ]
-                              )
-                            ])
-                          ])
-                        ])
+                            _c(
+                              "button",
+                              {
+                                directives: [
+                                  {
+                                    name: "show",
+                                    rawName: "v-show",
+                                    value: _vm.mostrar,
+                                    expression: "mostrar"
+                                  }
+                                ],
+                                staticClass: "btn btn-outline-success",
+                                attrs: { type: "submit" }
+                              },
+                              [
+                                _c("i", { staticClass: "fas fa-paper-plane" }),
+                                _vm._v(" Enviar\n                ")
+                              ]
+                            )
+                          ]
+                        )
                       ]
                     )
                   ])
-                ])
-              ]),
-              _vm._v(" "),
-              _c(
-                "div",
-                { staticClass: "modal-footer justify-content-between" },
-                [
-                  _c(
-                    "button",
-                    {
-                      staticClass: "btn btn-outline-danger",
-                      attrs: { type: "button", "data-dismiss": "modal" }
-                    },
-                    [_vm._v("Cerrar")]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "button",
-                    {
-                      directives: [
-                        {
-                          name: "show",
-                          rawName: "v-show",
-                          value: !_vm.mostrar,
-                          expression: "!mostrar"
-                        }
-                      ],
-                      staticClass: "btn btn-outline-primary",
-                      attrs: { type: "button" },
-                      on: {
-                        click: function($event) {
-                          $event.preventDefault()
-                          return _vm.getEmpleado($event)
-                        }
-                      }
-                    },
-                    [
-                      _c("i", { staticClass: "fas fa-search" }),
-                      _vm._v(" Buscar\n            ")
-                    ]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "button",
-                    {
-                      directives: [
-                        {
-                          name: "show",
-                          rawName: "v-show",
-                          value: _vm.mostrar,
-                          expression: "mostrar"
-                        }
-                      ],
-                      staticClass: "btn btn-outline-success",
-                      attrs: { type: "button" },
-                      on: {
-                        click: function($event) {
-                          $event.preventDefault()
-                          return _vm.postEmpleado($event)
-                        }
-                      }
-                    },
-                    [
-                      _c("i", { staticClass: "fas fa-paper-plane" }),
-                      _vm._v(" Enviar\n            ")
-                    ]
-                  )
                 ]
               )
-            ])
-          ])
+            ]
+          )
         ]
       )
     ])
@@ -62421,92 +62517,18 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "modal-header" }, [
-      _c("h4", { staticClass: "modal-title" }, [
-        _vm._v("Detalles de la solicitud")
-      ]),
-      _vm._v(" "),
-      _c(
-        "button",
-        {
-          staticClass: "close",
-          attrs: {
-            type: "button",
-            "data-dismiss": "modal",
-            "aria-label": "Close"
-          }
-        },
-        [_c("span", { attrs: { "aria-hidden": "true" } }, [_vm._v("×")])]
-      )
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "input-group-prepend" }, [
-      _c("span", { staticClass: "input-group-text" }, [
-        _c("i", { staticClass: "fas fa-user" })
-      ])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "input-group-prepend" }, [
-      _c("span", { staticClass: "input-group-text" }, [
-        _c("i", { staticClass: "fas fa-fingerprint" })
-      ])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "input-group-prepend" }, [
-      _c("span", { staticClass: "input-group-text" }, [
-        _c("i", { staticClass: "fas fa-user" })
-      ])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "modal-footer" }, [
-      _c(
-        "button",
-        {
-          staticClass: "btn btn-danger",
-          attrs: { type: "button", "data-dismiss": "modal" }
-        },
-        [_vm._v("Cerrar")]
-      )
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "modal-header" }, [
-      _c("h4", { staticClass: "modal-title" }, [
-        _vm._v("SOLICITUD DE SALIDAD")
-      ]),
-      _vm._v(" "),
-      _c(
-        "button",
-        {
-          staticClass: "close",
-          attrs: {
-            type: "button",
-            "data-dismiss": "modal",
-            "aria-label": "Close"
-          }
-        },
-        [_c("span", { attrs: { "aria-hidden": "true" } }, [_vm._v("×")])]
-      )
-    ])
+    return _c(
+      "button",
+      {
+        staticClass: "close",
+        attrs: {
+          type: "button",
+          "data-dismiss": "modal",
+          "aria-label": "Close"
+        }
+      },
+      [_c("span", { attrs: { "aria-hidden": "true" } }, [_vm._v("×")])]
+    )
   },
   function() {
     var _vm = this

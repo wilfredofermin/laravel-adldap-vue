@@ -28,20 +28,26 @@ class CreateSolicitudsTable extends Migration
             $table->integer('serviceskit')->unique();
 
             // Visible solo para ingreso
-            $table->integer('cedula')->unique()->nullable();
+            $table->string('identidad')->unique()->nullable();
 
-            $table->string('nombres',50);
-            $table->string('apellidos',50);
+            $table->string('nombres',30)->nullable();
+            $table->string('apellidos',30)->nullable();
+            $table->string('nombre_completo',60);
 
-            $table->string('departamento');
+            $table->string('correo_electronico')->nullable();
+            $table->string('telefono',13)->nullable();
+            $table->string('nota',300)->nullable();
+
+
             $table->string('puesto');
+            $table->string('departamento');
             $table->string('localidad');
             
             $table->string('estado')->default("Abierto");
             $table->string('Prioridad');
 
             // Asignado via el controlador
-            $table->string('supervisor_email');
+            $table->string('supervisor')->nullable();
 
             // Quien registro la solicitud
             $table->string('registrado_por');
