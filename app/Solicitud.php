@@ -22,7 +22,8 @@ class Solicitud extends Model
         'estado',
         'prioridad',
         'supervisor',
-        'registrado_por',
+        'solicitante_usuario',
+        'solicitante_nombre', 
         'modificado_por',
         'created_at',
         'updated_at'

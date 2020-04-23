@@ -2449,6 +2449,13 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
@@ -2457,6 +2464,7 @@ __webpack_require__.r(__webpack_exports__);
       mostrar: false,
       salida: false,
       is_valido: false,
+      is_admin: false,
       //   dynamicValue: false,
       db_solicitudes: {},
       db_empleados: {},
@@ -2465,7 +2473,6 @@ __webpack_require__.r(__webpack_exports__);
       data_puestos: [],
       data_localidad: [],
       nombre_completo: null,
-      SubV: null,
       empleado_nombre: null,
       empleado_email: null,
       buscar_empleado: null,
@@ -2525,6 +2532,9 @@ __webpack_require__.r(__webpack_exports__);
         _this.$Progress.fail();
       });
     },
+    postProcesar: function postProcesar() {
+      console.log("estas en postProcesar");
+    },
     // ----------------------------------------------------------------------------
     // PETICIONES TIPO - DELETE
     // ----------------------------------------------------------------------------
@@ -2536,8 +2546,7 @@ __webpack_require__.r(__webpack_exports__);
         swal.fire({
           title: "<strong >ATENCION !</strong> ",
           html: "Esta haciendo una solicitud de<strong> salida del empleado </strong> <br> " + "<h2>" + this.empleado_nombre + "</h2>",
-          type: "info",
-          footer: '<button type="button" class="btn-block btn btn-outline-primary">Esta accion genera un ticket en <strong>serviceskit</strong> </button>',
+          footer: '<button type="button" class="btn-block btn btn-outline-primary disabled">Esta accion genera un ticket en <strong>serviceskit</strong> </button>',
           showCancelButton: true,
           confirmButtonColor: "#3085d6",
           cancelButtonColor: "#d33",
@@ -2568,6 +2577,7 @@ __webpack_require__.r(__webpack_exports__);
     // VENTANA MODAL - MODAL DE INFORMACION
     Informacion: function Informacion(solicitud) {
       this.mostrar = true;
+      this.is_admin = true;
       this.is_valido = false;
 
       if (solicitud.tipo === 1) {
@@ -2592,7 +2602,7 @@ __webpack_require__.r(__webpack_exports__);
 
       this.empleado_supervisor = solicitud.supervisor; // SOLICITANTE
 
-      this.solicitante = solicitud.registrado_por; // axios.get("/infoSolicitud/" + solicitud.id).then(response => {
+      this.solicitante = solicitud.solicitante_nombre; // axios.get("/infoSolicitud/" + solicitud.id).then(response => {
       //   this.nombre_completo =
       //     response.data.nombres + " " + response.data.apellidos;
       //   this.identidad_info = response.data.identidad;
@@ -61059,17 +61069,7 @@ var render = function() {
                         ? _c("td", [_vm._m(2, true)])
                         : solicitud.tipo == 2
                         ? _c("td", [_vm._m(3, true)])
-                        : _c("td", [
-                            _c(
-                              "button",
-                              {
-                                staticClass:
-                                  "btn btn-outline-primary btn-sm btn-block",
-                                attrs: { type: "button" }
-                              },
-                              [_vm._v("Modificacion")]
-                            )
-                          ]),
+                        : _c("td", [_vm._m(4, true)]),
                       _vm._v(" "),
                       _c("td", [
                         _vm._v(
@@ -61200,7 +61200,7 @@ var render = function() {
                 },
                 [
                   _c("div", { staticClass: "modal-content" }, [
-                    _vm._m(4),
+                    _vm._m(5),
                     _vm._v(" "),
                     _c("div", { staticClass: "modal-body" }, [
                       _c("div", { staticClass: "card card-header" }, [
@@ -61211,7 +61211,7 @@ var render = function() {
                                 "div",
                                 { staticClass: "input-group mb-3" },
                                 [
-                                  _vm._m(5),
+                                  _vm._m(6),
                                   _vm._v(" "),
                                   _c("input", {
                                     directives: [
@@ -61272,7 +61272,7 @@ var render = function() {
                                 "div",
                                 { staticClass: "input-group mb-3" },
                                 [
-                                  _vm._m(6),
+                                  _vm._m(7),
                                   _vm._v(" "),
                                   _c("input", {
                                     directives: [
@@ -61329,7 +61329,7 @@ var render = function() {
                                 "div",
                                 { staticClass: "input-group mb-3" },
                                 [
-                                  _vm._m(7),
+                                  _vm._m(8),
                                   _vm._v(" "),
                                   _c("input", {
                                     directives: [
@@ -61391,7 +61391,7 @@ var render = function() {
                                 "div",
                                 { staticClass: "input-group mb-3" },
                                 [
-                                  _vm._m(8),
+                                  _vm._m(9),
                                   _vm._v(" "),
                                   _c("input", {
                                     directives: [
@@ -61450,7 +61450,7 @@ var render = function() {
                                 "div",
                                 { staticClass: "input-group mb-3" },
                                 [
-                                  _vm._m(9),
+                                  _vm._m(10),
                                   _vm._v(" "),
                                   _c("input", {
                                     directives: [
@@ -61774,7 +61774,7 @@ var render = function() {
                               "div",
                               { staticClass: "input-group mb-3" },
                               [
-                                _vm._m(10),
+                                _vm._m(11),
                                 _vm._v(" "),
                                 _c("input", {
                                   directives: [
@@ -61822,7 +61822,7 @@ var render = function() {
                         ])
                       ]),
                       _vm._v(" "),
-                      _vm._m(11)
+                      _vm._m(12)
                     ])
                   ])
                 ]
@@ -61885,7 +61885,7 @@ var render = function() {
                         [_vm._v("SOLICITUD DE INGRESO")]
                       ),
                       _vm._v(" "),
-                      _vm._m(12)
+                      _vm._m(13)
                     ]),
                     _vm._v(" "),
                     _c("div", { staticClass: "modal-body" }, [
@@ -61905,7 +61905,7 @@ var render = function() {
                               staticClass: "input-group mb-3"
                             },
                             [
-                              _vm._m(13),
+                              _vm._m(14),
                               _vm._v(" "),
                               _c("input", {
                                 directives: [
@@ -61977,7 +61977,7 @@ var render = function() {
                                       : "bg-primary"
                                 },
                                 [
-                                  _vm._m(14),
+                                  _vm._m(15),
                                   _vm._v(" "),
                                   _c(
                                     "h3",
@@ -62168,47 +62168,49 @@ var render = function() {
                                     )
                                   ]),
                                   _vm._v(" "),
-                                  _c("li", { staticClass: "nav-item" }, [
-                                    _c(
-                                      "a",
-                                      {
-                                        staticClass: "nav-link",
-                                        attrs: { href: "#" }
-                                      },
-                                      [
-                                        _vm._v(
-                                          "\n                            Solicitado por:\n                            "
-                                        ),
+                                  _vm.solicitante
+                                    ? _c("li", { staticClass: "nav-item" }, [
                                         _c(
-                                          "span",
+                                          "a",
                                           {
-                                            staticClass:
-                                              "description-text float-right"
+                                            staticClass: "nav-link",
+                                            attrs: { href: "#" }
                                           },
                                           [
+                                            _vm._v(
+                                              "\n                            Solicitante\n                            "
+                                            ),
                                             _c(
-                                              "Button",
+                                              "span",
                                               {
                                                 staticClass:
-                                                  "btn btn-block btn-outline-primary btn-sm",
-                                                attrs: { type: "button" }
+                                                  "description-text float-right"
                                               },
                                               [
-                                                _vm._v(
-                                                  _vm._s(
-                                                    _vm._f("capitalize")(
-                                                      _vm.solicitante
+                                                _c(
+                                                  "Button",
+                                                  {
+                                                    staticClass:
+                                                      "btn btn-block btn-outline-primary btn-sm",
+                                                    attrs: { type: "button" }
+                                                  },
+                                                  [
+                                                    _vm._v(
+                                                      _vm._s(
+                                                        _vm._f("capitalize")(
+                                                          _vm.solicitante
+                                                        )
+                                                      )
                                                     )
-                                                  )
+                                                  ]
                                                 )
-                                              ]
+                                              ],
+                                              1
                                             )
-                                          ],
-                                          1
+                                          ]
                                         )
-                                      ]
-                                    )
-                                  ])
+                                      ])
+                                    : _vm._e()
                                 ])
                               ])
                             ]
@@ -62303,6 +62305,32 @@ var render = function() {
                                 _c("i", { staticClass: "fas fa-check-circle" }),
                                 _vm._v(" Enviar\n                ")
                               ]
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "button",
+                              {
+                                directives: [
+                                  {
+                                    name: "show",
+                                    rawName: "v-show",
+                                    value: _vm.is_admin,
+                                    expression: "is_admin"
+                                  }
+                                ],
+                                staticClass: "btn btn-outline-success",
+                                attrs: { type: "buttton" },
+                                on: {
+                                  click: function($event) {
+                                    $event.preventDefault()
+                                    return _vm.postProcesar()
+                                  }
+                                }
+                              },
+                              [
+                                _c("i", { staticClass: "fas fa-check-circle" }),
+                                _vm._v(" Procesar\n                ")
+                              ]
                             )
                           ]
                         )
@@ -62394,6 +62422,22 @@ var staticRenderFns = [
       [
         _c("i", { staticClass: "fas fa-arrow-alt-circle-left" }),
         _vm._v(" Salida\n                  ")
+      ]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "button",
+      {
+        staticClass: "btn btn-outline-success btn-sm btn-block",
+        attrs: { type: "button" }
+      },
+      [
+        _c("i", { staticClass: "fas fa-arrow-alt-circle-up" }),
+        _vm._v(" Modificacion\n                  ")
       ]
     )
   },

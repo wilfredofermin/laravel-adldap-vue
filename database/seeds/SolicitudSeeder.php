@@ -24,7 +24,8 @@ class SolicitudSeeder extends Seeder
             'localidad' => 'Julio Verne',
             'prioridad' =>'normal',
             'supervisor'     => 'rcontrera@viva.com.do',
-            'registrado_por'     => 'uprueba',
+            'solicitante_usuario'     => 'wfermin',
+            'solicitante_nombre'     => 'Wilfredo Fermin R.',
             'modificado_por'     => '',
                
         ]);
@@ -41,7 +42,8 @@ class SolicitudSeeder extends Seeder
             'localidad' => 'Julio Verne',
             'prioridad' =>'normal',
             'supervisor'     => 'smardonado@viva.com.do',
-            'registrado_por'     => 'uprueba',
+            'solicitante_usuario'     => 'wfermin',
+            'solicitante_nombre'     => 'Wilfredo Fermin R.',
             'modificado_por'     => '', 
            
         ]);
@@ -58,7 +60,8 @@ class SolicitudSeeder extends Seeder
             'localidad' => 'Julio Verne',
             'prioridad' =>'alta',
             'supervisor'     => 'smardonado@viva.com.do',
-            'registrado_por'     => 'uprueba',
+            'solicitante_usuario'     => 'wfermin',
+            'solicitante_nombre'     => 'Wilfredo Fermin R.',
             'modificado_por'     => '',
             
         ]);
@@ -75,7 +78,8 @@ class SolicitudSeeder extends Seeder
             'localidad' => 'Julio Verne',
             'prioridad' =>'alta',
             'supervisor'     => 'rcontrera@viva.com.do',
-            'registrado_por'     => 'wfermin',
+            'solicitante_usuario'     => 'wfermin',
+            'solicitante_nombre'     => 'Wilfredo Fermin R.',
             'modificado_por'     => '',
               
         ]);
@@ -92,9 +96,11 @@ class SolicitudSeeder extends Seeder
             'localidad' => 'Julio Verne',
             'prioridad' =>'baja',
             'supervisor'     => 'rcontrera@viva.com.do',
-            'registrado_por'     => 'wfermin',
+            'solicitante_usuario'     => 'wfermin',
+            'solicitante_nombre'     => 'Wilfredo Fermin R.',
             'modificado_por'     => 'wfermin',
            
         ]);
     }
 }
+

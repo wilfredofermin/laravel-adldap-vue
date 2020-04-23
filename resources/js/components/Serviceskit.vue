@@ -78,10 +78,9 @@
                     </button>
                   </td>
                   <td v-else>
-                    <button
-                      type="button"
-                      class="btn btn-outline-primary btn-sm btn-block"
-                    >Modificacion</button>
+                    <button type="button" class="btn btn-outline-success btn-sm btn-block">
+                      <i class="fas fa-arrow-alt-circle-up"></i> Modificacion
+                    </button>
                   </td>
                   <td>{{ solicitud.nombre_completo | capitalize }}</td>
                   <td>{{ solicitud.puesto | capitalize }}</td>
@@ -464,9 +463,9 @@
                               >{{empleado_supervisor | capitalize}}</span>
                             </a>
                           </li>
-                          <li class="nav-item">
+                          <li class="nav-item" v-if="solicitante">
                             <a href="#" class="nav-link">
-                              Solicitado por:
+                              Solicitante
                               <span class="description-text float-right">
                                 <Button
                                   class="btn btn-block btn-outline-primary btn-sm"
@@ -508,6 +507,14 @@
                   >
                     <i class="fas fa-check-circle"></i> Enviar
                   </button>
+                  <button
+                    v-show="is_admin"
+                    type="buttton"
+                    class="btn btn-outline-success"
+                    @click.prevent="postProcesar()"
+                  >
+                    <i class="fas fa-check-circle"></i> Procesar
+                  </button>
                 </div>
               </div>
             </div>
@@ -531,6 +538,7 @@ export default {
       mostrar: false,
       salida: false,
       is_valido: false,
+      is_admin: false,
       //   dynamicValue: false,
       db_solicitudes: {},
       db_empleados: {},
@@ -539,7 +547,6 @@ export default {
       data_puestos: [],
       data_localidad: [],
       nombre_completo: null,
-      SubV: null,
       empleado_nombre: null,
       empleado_email: null,
       buscar_empleado: null,
@@ -600,6 +607,9 @@ export default {
           this.$Progress.fail();
         });
     },
+    postProcesar() {
+      console.log("estas en postProcesar");
+    },
     // ----------------------------------------------------------------------------
     // PETICIONES TIPO - DELETE
     // ----------------------------------------------------------------------------
@@ -614,9 +624,8 @@ export default {
               "<h2>" +
               this.empleado_nombre +
               "</h2>",
-            type: "info",
             footer:
-              '<button type="button" class="btn-block btn btn-outline-primary">Esta accion genera un ticket en <strong>serviceskit</strong> </button>',
+              '<button type="button" class="btn-block btn btn-outline-primary disabled">Esta accion genera un ticket en <strong>serviceskit</strong> </button>',
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
@@ -644,6 +653,7 @@ export default {
     // VENTANA MODAL - MODAL DE INFORMACION
     Informacion: function(solicitud) {
       this.mostrar = true;
+      this.is_admin = true;
       this.is_valido = false;
       if (solicitud.tipo === 1) {
         this.salida = false;
@@ -667,7 +677,7 @@ export default {
       // SUPERVISOR
       this.empleado_supervisor = solicitud.supervisor;
       // SOLICITANTE
-      this.solicitante = solicitud.registrado_por;
+      this.solicitante = solicitud.solicitante_nombre;
 
       // axios.get("/infoSolicitud/" + solicitud.id).then(response => {
       //   this.nombre_completo =

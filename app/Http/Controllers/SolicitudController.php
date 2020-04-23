@@ -32,7 +32,7 @@ class SolicitudController extends Controller
     // PATICIONES BASE DE DATOS LOCAL
     // ----------------------------------------------------------------------------------------------------
     public function getSolicitudes(){
-        return Solicitud::where('registrado_por',Auth::user()->username)->orderBy('created_at', 'desc')->get();
+        return Solicitud::where('solicitante_usuario',Auth::user()->username)->orderBy('created_at', 'desc')->get();
    }
    
    public function getDepartamentos(){
@@ -89,6 +89,7 @@ class SolicitudController extends Controller
             'puesto' => 'required',
             'localidad' => 'required',
             'supervisor' => 'required',
+            
         ]);    
 
             // try {
@@ -123,7 +124,7 @@ class SolicitudController extends Controller
             // $supervisor_email = $request['supervisor'];
             // 'registrado_por' => Auth::user()->username ,
            
-            $detalles_solicititud ='CEDULA :'.' '.$cedula.' | '.'NOMBRE :'.' '.$nombrecompleto.' | '.'PUESTO :'.' '.$puesto.' | '.'DEPARTAMENTO :'.''.$departamento.' | '.'LOCALIDAD :'.' '.$localidad.' | '.'SUPERVISOR :'.' | '.$supervisor_nombre ;
+            $detalles_solicititud ='CEDULA :'.' '.$cedula.' | '.'NOMBRE :'.' '.$nombrecompleto.' | '.'PUESTO :'.' '.$puesto.' | '.'DEPARTAMENTO :'.' '.$departamento.' | '.'LOCALIDAD :'.' '.$localidad.' | '.'SUPERVISOR :'.' '.$supervisor_nombre ;
             $subject = 'NUEVO INGRESO :'.' '.$nombrecompleto; 
           $Urs ='http://servicekit.viva.com.do/servlets/RequestServlet?';
             // Parametros
@@ -179,8 +180,10 @@ class SolicitudController extends Controller
                     'puesto' => $puesto,
                     'localidad' => $localidad,
                     'supervisor' => $supervisor_nombre,
-                    'registrado_por' => Auth::user()->username ,
+                    'solicitante_usuario' => Auth::user()->username ,
+                    'solicitante_nombre' => Auth::user()->name ,
                     'modificado_por' => Auth::user()->username , 
+
                 ]);
 
 
@@ -215,7 +218,7 @@ class SolicitudController extends Controller
             // $supervisor_email = $request['supervisor'];
             // 'registrado_por' => Auth::user()->username ,
            
-            $detalles_solicititud ='USUARIO:'.' '.$usuario.' | '.'NOMBRE :'.' '.$nombrecompleto.' | '.'PUESTO :'.' '.$puesto.' | '.'DEPARTAMENTO :'.''.$departamento.' | '.'LOCALIDAD :'.' '.$localidad;
+            $detalles_solicititud ='USUARIO:'.' '.$usuario.' | '.'NOMBRE :'.' '.$nombrecompleto.' | '.'PUESTO :'.' '.$puesto.' | '.'DEPARTAMENTO :'.' '.$departamento.' | '.'LOCALIDAD :'.' '.$localidad;
             $subject = 'SALIDA DE EMPLEADO :'.' '.$nombrecompleto; 
             $Urs ='http://servicekit.viva.com.do/servlets/RequestServlet?';
       
@@ -272,7 +275,8 @@ class SolicitudController extends Controller
                     'puesto' => $puesto,
                     'localidad' => $localidad,
                     'supervisor' => $supervisor_nombre,
-                    'registrado_por' => Auth::user()->username ,
+                    'solicitante_usuario' => Auth::user()->username ,
+                    'solicitante_nombre' => Auth::user()->name ,
                     'modificado_por' => Auth::user()->username , 
                 ]);
             
@@ -345,7 +349,8 @@ class SolicitudController extends Controller
             'puesto' => $request['puesto'],
             'localidad' => $request['localidad'],
             'supervisor_email' => $request['supervisor'],
-            'registrado_por' => Auth::user()->username ,
+            'solicitante_usuario' => Auth::user()->username ,
+            'solicitante_nombre' => Auth::user()->name ,
             'modificado_por' => Auth::user()->username , 
         ]);
 

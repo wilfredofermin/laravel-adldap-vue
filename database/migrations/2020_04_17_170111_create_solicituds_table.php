@@ -50,7 +50,9 @@ class CreateSolicitudsTable extends Migration
             $table->string('supervisor')->nullable();
 
             // Quien registro la solicitud
-            $table->string('registrado_por');
+            $table->string('solicitante_usuario');
+            $table->string('solicitante_nombre');
+
 
             // Usuario que lo medifico | Tomara el usuario quien lo abra despues de creado
             $table->string('modificado_por')->nullable();
