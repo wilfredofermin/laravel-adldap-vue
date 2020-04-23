@@ -2453,6 +2453,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     var _Form;
@@ -2462,6 +2472,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       // Cuando inicia oculta los demas input en el modal Desahucio
       mostrar: false,
       salida: false,
+      is_valido: false,
       //   dynamicValue: false,
       db_solicitudes: {},
       db_empleados: {},
@@ -2505,6 +2516,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       this.form.reset();
       $("#addnew").modal("show");
     },
+    // ----------------------------------------------------------------------------
+    // PETICIONES TIPO - POST
+    // ----------------------------------------------------------------------------
     postIngreso: function postIngreso() {
       var _this = this;
 
@@ -2530,6 +2544,46 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       ["catch"](function () {
         _this.$Progress.fail();
       });
+    },
+    // ----------------------------------------------------------------------------
+    // PETICIONES TIPO - DELETE
+    // ----------------------------------------------------------------------------
+    deleteSalida: function deleteSalida(empleado_usuario) {
+      var _this2 = this;
+
+      if (this.is_valido) {
+        $("#modal-detalles").modal("hide");
+        swal.fire({
+          title: "<strong >ATENCION !</strong> ",
+          html: "Esta haciendo una solicitud de<strong> salida del empleado </strong> <br> " + "<h2>" + this.empleado_nombre + "</h2>",
+          type: "info",
+          footer: '<button type="button" class="btn-block btn btn-outline-primary">Esta accion genera un ticket en <strong>serviceskit</strong> </button>',
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Si, realizar la solicitud"
+        }).then(function (result) {
+          if (result.value) {
+            _this2.$Progress.start(); //Envio el request al servidor - backend
+
+
+            axios["delete"]("/deleteSalida/" + empleado_usuario).then(function () {
+              toast.fire({
+                type: "success",
+                title: "Solicitud realizada exitosamente"
+              });
+
+              _this2.modalCierre();
+
+              Fire.$emit("RecargarData");
+
+              _this2.$Progress.finish();
+            });
+          }
+
+          _this2.modalCierre();
+        });
+      }
     },
     // VENTANA MODAL - MODAL DE INFORMACION
     Informacion: function Informacion(solicitud) {
@@ -2581,7 +2635,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     // PETICIONES AL ACTIVE DIRECTORY
     // ----------------------------------------------------------------------------
     getEmpleado: function getEmpleado() {
-      var _this2 = this;
+      var _this3 = this;
 
       this.salida = true;
       this.mostrar = false;
@@ -2591,61 +2645,51 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if (this.buscar_empleado != null) {
         var buscar = this.buscar_empleado;
         axios.get("/getEmpleado?q=" + buscar).then(function (response) {
-          _this2.$Progress.start(); // console.log((this.db_empleados = response.data.description));
+          _this3.$Progress.start(); // console.log((this.db_empleados = response.data.description));
 
 
-          _this2.mostrar = true;
-          _this2.db_empleados = response.data; // NOMBRES COMPLEETO
+          _this3.mostrar = true;
+          _this3.is_valido = true;
+          _this3.db_empleados = response.data; // NOMBRES COMPLEETO
 
-          _this2.empleado_nombre = response.data.name; // NOMBRES
+          _this3.empleado_nombre = response.data.name;
+          _this3.empleado_usuario = response.data.samaccountname; // DEPARTAMENTO
 
-          _this2.formSalida.salida_Nombres = response.data.givenname; // APELLIDOS
+          _this3.empleado_departamento = response.data.department; // PUESTO
 
-          _this2.formSalida.salida_Nombres = response.data.sn; // USUARIO
+          _this3.empleado_puesto = response.data.description; // LOCALIDAD
 
-          _this2.empleado_usuario = response.data.samaccountname;
-          _this2.formSalida.salida_usuaio = response.data.samaccountname; // DEPARTAMENTO
+          _this3.empleado_localidad = response.data.physicaldeliveryofficename; // EMAIL
 
-          _this2.empleado_departamento = response.data.department;
-          _this2.formSalida.salida_departamento = response.data.department; // PUESTO
+          _this3.empleado_email = response.data.userprincipalname; // SUPERVISOR
 
-          _this2.empleado_puesto = response.data.description;
-          _this2.formSalida.salida_Puesto = response.data.description; // LOCALIDAD
+          _this3.empleado_supervisor = response.data.manager;
 
-          _this2.empleado_localidad = response.data.physicaldeliveryofficename;
-          _this2.formSalida.salida_localidad = response.data.physicaldeliveryofficename; // EMAIL
-
-          _this2.empleado_email = response.data.userprincipalname; // SUPERVISOR
-
-          _this2.empleado_supervisor = response.data.manager;
-          _this2.formSalida.salida_supervisor = response.data.manager;
-
-          _this2.$Progress.finish();
+          _this3.$Progress.finish();
         })["catch"](function (e) {
           console.log(e);
         });
       }
     },
-    postSalida: function postSalida() {
-      console.log("estas en postSalida");
-    },
+    // ----------------------------------------------------------------------------
+    // PETICIONES TIPO - GET
     // ----------------------------------------------------------------------------
     getSolicitudes: function getSolicitudes() {
-      var _this3 = this;
+      var _this4 = this;
 
       axios.get("/getSolicitudes").then(function (response) {
-        _this3.db_solicitudes = response.data;
+        _this4.db_solicitudes = response.data;
       });
     },
     getDepartamentos: function getDepartamentos() {
-      var _this4 = this;
+      var _this5 = this;
 
       axios.get("/getDepartamentos").then(function (response) {
-        _this4.data_departamentos = response.data;
+        _this5.data_departamentos = response.data;
       });
     },
     getPuestos: function getPuestos() {
-      var _this5 = this;
+      var _this6 = this;
 
       this.form.puesto = "";
 
@@ -2655,7 +2699,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             departamento_id: this.form.departamento
           }
         }).then(function (response) {
-          _this5.data_puestos = response.data;
+          _this6.data_puestos = response.data;
           document.getElementById("puesto").disabled = false;
         })["catch"](function (e) {
           console.log(e);
@@ -2666,23 +2710,23 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       document.getElementById("supervisor").disabled = false;
     },
     getLocalidad: function getLocalidad() {
-      var _this6 = this;
+      var _this7 = this;
 
       this.form.localidad = "";
       axios.get("/getLocalidad").then(function (response) {
-        _this6.data_localidad = response.data;
+        _this7.data_localidad = response.data;
         document.getElementById("localidad").disabled = false;
       });
     }
   },
   created: function created() {
-    var _this7 = this;
+    var _this8 = this;
 
     this.$Progress.start();
     this.getSolicitudes();
     this.getDepartamentos();
     Fire.$on("RecargarData", function () {
-      _this7.getSolicitudes();
+      _this8.getSolicitudes();
     });
     this.$Progress.finish();
   },
@@ -60946,20 +60990,7 @@ var render = function() {
             _vm._v(" "),
             _c("div", { staticClass: "card-tools" }, [
               _c("div", { staticClass: "dropdown" }, [
-                _c(
-                  "button",
-                  {
-                    staticClass: "btn btn-primary dropdown-toggle",
-                    attrs: {
-                      type: "button",
-                      id: "dropdownMenu2",
-                      "data-toggle": "dropdown",
-                      "aria-haspopup": "true",
-                      "aria-expanded": "false"
-                    }
-                  },
-                  [_vm._v("Solicitud")]
-                ),
+                _vm._m(0),
                 _vm._v(" "),
                 _c(
                   "div",
@@ -60987,6 +61018,8 @@ var render = function() {
                         _vm._v(" Nuevo Ingreso\n                ")
                       ]
                     ),
+                    _vm._v(" "),
+                    _c("li", { staticClass: "divider" }),
                     _vm._v(" "),
                     _c(
                       "button",
@@ -61017,7 +61050,7 @@ var render = function() {
           _vm._v(" "),
           _c("div", { staticClass: "card-body table-responsive p-0" }, [
             _c("table", { staticClass: "table table-hover" }, [
-              _vm._m(0),
+              _vm._m(1),
               _vm._v(" "),
               _c(
                 "tbody",
@@ -61073,9 +61106,9 @@ var render = function() {
                       _vm._v(" "),
                       _c("td", [
                         _vm._v(
-                          _vm._s(_vm._f("capitalize")(solicitud.nombres)) +
-                            " " +
-                            _vm._s(_vm._f("capitalize")(solicitud.apellidos))
+                          _vm._s(
+                            _vm._f("capitalize")(solicitud.nombre_completo)
+                          )
                         )
                       ]),
                       _vm._v(" "),
@@ -61135,7 +61168,7 @@ var render = function() {
                               [_vm._v("Normal")]
                             )
                           ])
-                        : solicitud.Prioridad == "baja"
+                        : solicitud.Prioridad == "alta"
                         ? _c("td", [
                             _c(
                               "button",
@@ -61200,7 +61233,7 @@ var render = function() {
                 },
                 [
                   _c("div", { staticClass: "modal-content" }, [
-                    _vm._m(1),
+                    _vm._m(2),
                     _vm._v(" "),
                     _c("div", { staticClass: "modal-body" }, [
                       _c("div", { staticClass: "card card-header" }, [
@@ -61211,7 +61244,7 @@ var render = function() {
                                 "div",
                                 { staticClass: "input-group mb-3" },
                                 [
-                                  _vm._m(2),
+                                  _vm._m(3),
                                   _vm._v(" "),
                                   _c("input", {
                                     directives: [
@@ -61272,7 +61305,7 @@ var render = function() {
                                 "div",
                                 { staticClass: "input-group mb-3" },
                                 [
-                                  _vm._m(3),
+                                  _vm._m(4),
                                   _vm._v(" "),
                                   _c("input", {
                                     directives: [
@@ -61329,7 +61362,7 @@ var render = function() {
                                 "div",
                                 { staticClass: "input-group mb-3" },
                                 [
-                                  _vm._m(4),
+                                  _vm._m(5),
                                   _vm._v(" "),
                                   _c("input", {
                                     directives: [
@@ -61391,7 +61424,7 @@ var render = function() {
                                 "div",
                                 { staticClass: "input-group mb-3" },
                                 [
-                                  _vm._m(5),
+                                  _vm._m(6),
                                   _vm._v(" "),
                                   _c("input", {
                                     directives: [
@@ -61450,7 +61483,7 @@ var render = function() {
                                 "div",
                                 { staticClass: "input-group mb-3" },
                                 [
-                                  _vm._m(6),
+                                  _vm._m(7),
                                   _vm._v(" "),
                                   _c("input", {
                                     directives: [
@@ -61774,7 +61807,7 @@ var render = function() {
                               "div",
                               { staticClass: "input-group mb-3" },
                               [
-                                _vm._m(7),
+                                _vm._m(8),
                                 _vm._v(" "),
                                 _c("input", {
                                   directives: [
@@ -61822,7 +61855,7 @@ var render = function() {
                         ])
                       ]),
                       _vm._v(" "),
-                      _vm._m(8)
+                      _vm._m(9)
                     ])
                   ])
                 ]
@@ -61885,7 +61918,7 @@ var render = function() {
                         [_vm._v("DETALLES DEL USUARIO")]
                       ),
                       _vm._v(" "),
-                      _vm._m(9)
+                      _vm._m(10)
                     ]),
                     _vm._v(" "),
                     _c("div", { staticClass: "modal-body" }, [
@@ -61905,7 +61938,7 @@ var render = function() {
                               staticClass: "input-group mb-3"
                             },
                             [
-                              _vm._m(10),
+                              _vm._m(11),
                               _vm._v(" "),
                               _c("input", {
                                 directives: [
@@ -61977,7 +62010,7 @@ var render = function() {
                                       : "bg-primary"
                                 },
                                 [
-                                  _vm._m(11),
+                                  _vm._m(12),
                                   _vm._v(" "),
                                   _c(
                                     "h3",
@@ -62369,7 +62402,15 @@ var render = function() {
                                   }
                                 ],
                                 staticClass: "btn btn-outline-success",
-                                attrs: { type: "submit" }
+                                attrs: { type: "submit" },
+                                on: {
+                                  click: function($event) {
+                                    $event.preventDefault()
+                                    return _vm.deleteSalida(
+                                      _vm.empleado_usuario
+                                    )
+                                  }
+                                }
                               },
                               [
                                 _c("i", { staticClass: "fas fa-paper-plane" }),
@@ -62391,6 +62432,28 @@ var render = function() {
   ])
 }
 var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "button",
+      {
+        staticClass: "btn btn-primary dropdown-toggle",
+        attrs: {
+          type: "button",
+          id: "dropdownMenu2",
+          "data-toggle": "dropdown",
+          "aria-haspopup": "true",
+          "aria-expanded": "false"
+        }
+      },
+      [
+        _c("i", { staticClass: "fas fa-exchange-alt" }),
+        _vm._v(" Solicitud\n              ")
+      ]
+    )
+  },
   function() {
     var _vm = this
     var _h = _vm.$createElement

@@ -28,7 +28,7 @@ class CreateSolicitudsTable extends Migration
             $table->integer('serviceskit')->unique();
 
             // Visible solo para ingreso
-            $table->string('identidad')->unique()->nullable();
+            $table->string('identidad')->unique();
 
             $table->string('nombres',30)->nullable();
             $table->string('apellidos',30)->nullable();

@@ -125,7 +125,7 @@ Este proyecto ha sido creado para ser utilizado con fines interno a la empresa. 
                             <!--Para mantener el menu contraido-->
                             {{-- <li class="nav-item has-treeview menu-open"> --}}
                             <a href="#" class="nav-link active">
-                                <i class="nav-icon fas fa-users"></i>
+                                <i class="nav-icon fas fa-exchange-alt"></i>
                                 <p>
                                     SOLICITUDES
                                     <i class="right fas fa-angle-left"></i>

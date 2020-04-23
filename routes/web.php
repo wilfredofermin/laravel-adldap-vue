@@ -35,8 +35,10 @@ Route::get('/getSolicitudes', 'SolicitudController@getSolicitudes')->name('getSo
 Route::get('/getDepartamentos', 'SolicitudController@getDepartamentos')->name('getDepartamentos');
 Route::get('/getPuestos', 'SolicitudController@getPuestos')->name('getPuestos');
 Route::get('/getLocalidad', 'SolicitudController@getLocalidad')->name('getLocalidad');
-Route::get('/infoSolicitud/{id}', 'SolicitudController@infoSolicitud')->name('infoSolicitud');
 Route::get('/getEmpleado', 'SolicitudController@getEmpleado')->name('getEmpleado');
+
+Route::delete('/deleteSalida/{id}', 'SolicitudController@deleteSalida')->name('deleteSalida');
+
 
 
 // Vue-Router 

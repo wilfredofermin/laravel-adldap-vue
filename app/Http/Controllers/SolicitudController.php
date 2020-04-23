@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use responseresponseIlluminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Support\Facades\DB;
 use Adldap\Laravel\Facades\Adldap;
+use Illuminate\Support\Arr;
 
 use App\Solicitud;
 use App\Departamento;
@@ -48,7 +49,9 @@ class SolicitudController extends Controller
    }
 
     public function infoSolicitud($id){
+
     return Solicitud::findOrFail($id);
+
     }
 
 
@@ -100,6 +103,7 @@ class SolicitudController extends Controller
             $nombrecompleto = $nombres.' '.$apellidos;
             $puesto = $request['puesto'];
             $localidad = $request['localidad'];
+            $supervisor = $request['supervisor'];
 
             // ------------------------------------------------------
             // BUSQUEDA DE DATOS PARA GUARDAR EN LA TABLA DE SOLICITUDES
@@ -109,18 +113,112 @@ class SolicitudController extends Controller
             $buscar_departamento = Departamento::findOrFail($request['departamento']);
             $departamento = $buscar_departamento -> nombre ;
 
-            // BUSCAR EL NOBRE DE SUPERVISOR EN EL ACTIVE DIRECTORY
-            $buscar_supervisor = Adldap::search()->findByOrFail('samaccountname',  $request['supervisor']);
+            // // BUSCAR EL NOBRE DE SUPERVISOR EN EL ACTIVE DIRECTORY
+            $buscar_supervisor = Adldap::search()->findByOrFail('samaccountname',$request['supervisor']);
             // $buscar_supervisor = Adldap::search()->findByOrFail('userprincipalname',  $request['supervisor']);
-            $supervisor= $buscar_supervisor->name;
+             $supervisor_nombre = Arr::first($buscar_supervisor->name);
+            
+
 
             // $supervisor_email = $request['supervisor'];
             // 'registrado_por' => Auth::user()->username ,
            
-            $detalles_solicititud ='CEDULA :'.' '.$cedula.' | '.'NOMBRE :'.' '.$nombrecompleto.' | '.'PUESTO :'.' '.$puesto.' | '.'SUPERVISOR :'.' '.$supervisor_email.' | '.'LOCALIDAD :'.' '.$localidad;
+            $detalles_solicititud ='CEDULA :'.' '.$cedula.' | '.'NOMBRE :'.' '.$nombrecompleto.' | '.'PUESTO :'.' '.$puesto.' | '.'DEPARTAMENTO :'.''.$departamento.' | '.'LOCALIDAD :'.' '.$localidad.' | '.'SUPERVISOR :'.' | '.$supervisor_nombre ;
             $subject = 'NUEVO INGRESO :'.' '.$nombrecompleto; 
-
           $Urs ='http://servicekit.viva.com.do/servlets/RequestServlet?';
+            // Parametros
+            $query =[
+                              
+            'operation' => 'AddRequest',
+            // VALIACION AL SISTEMA SISTEMA
+            'username' => env('SERVICESKIT_USERNAME'),
+            'password' => env('SERVICESKIT_PASSWORD'),
+            // -------------------
+
+            //  DATOS A COMPLETAR POR EL FORMULARIO   
+            'requester' =>  Auth::user()->name,
+            'createdby' =>  Auth::user()->name,
+            // DESCRIPCION DE LA SOLICITUD 
+                // DESCRIPCION DE LA SOLICITUD 
+            'description' =>$detalles_solicititud ,
+
+            // VALORES DE LA PLANTILLA
+            // 'subject' => 'Solicitudes de Accesos y/o Administración de Empleados',
+            'subject' => $subject ,
+            'shortdescription' => $supervisor_nombre,
+            'requesttemplate' => '2001 Accesos y Administracion de Usuarios',
+            'service' => '002 Solicitudes de Empleados',
+            'category' => 'Solicitudes De Acceso',
+            'subcategory' => 'Administracion De Usuarios',
+            'item' => 'Nuevo Usuario',
+            'site' => 'Viva',
+            'group'=> 'IT-OPS-STI',
+            // 'technician' => 'sti', //--> Si coloco como tecnico STI esta ira intercambiando las solicitudes a los tecnicos disponnibles
+            'technician' => 'Wilfredo Fermin Reyes',
+
+            ];
+            // AQUI OPTENEMOS LA RESPUESTA RECIBIDA DEL SERVIDOR - SERVICESKT
+            $response = (Http::retry(3, 100)->get($Urs, $query));
+
+            // DEBIDO A QUE EL RESULTADO VIEN DENTRO DE UNA CADENA, DEBEMOS SACAR ESE VALOR
+            $extraerEntero = preg_replace('/[^0-9]+/', '', $response);
+            // DEBIDO A QUE EL VALOR SE REPITE, LIMITAMOS
+            $serviceskit_id = Str::limit($extraerEntero, 5,''); 
+
+            // DESPUES DE OBTENER EL RESULTADO LO ASIGNAMOS CON EL CODIGO DE SERVICESKIT MAS ABAJO
+
+                return Solicitud::create([
+                    'tipo' =>  1,
+                    'prioridad' =>'normal',
+                    'serviceskit' =>  $serviceskit_id,
+                    'identidad' =>   $cedula,
+                    'nombres' => $nombres,
+                    'apellidos' => $apellidos,
+                    'nombre_completo' =>$nombrecompleto,
+                    'departamento' => $departamento,
+                    'puesto' => $puesto,
+                    'localidad' => $localidad,
+                    'supervisor' => $supervisor_nombre,
+                    'registrado_por' => Auth::user()->username ,
+                    'modificado_por' => Auth::user()->username , 
+                ]);
+
+
+        // } catch (\Exception $e) {
+
+        //     return 'No se pudo completar';
+            
+        //     }
+
+    }
+
+
+    public function deleteSalida($id)
+        {
+          
+            // BUSCAR EL NOBRE DE SUPERVISOR EN EL ACTIVE DIRECTORY
+            $empleado = Adldap::search()->findByOrFail('samaccountname', $id);
+
+            // Arr::first -> Obtengo el primaer valor de una matriz
+            $usuario = Arr::first($empleado->samaccountname);
+            $nombrecompleto = Arr::first($empleado ->name);
+            $puesto = Arr::first($empleado ->description) ;
+            $departamento = Arr::first($empleado ->department);
+            $localidad = Arr::first($empleado->physicaldeliveryofficename) ;
+            $supervisor_nombre = Arr::first($empleado ->manager);
+            $correo_electronico = Arr::first($empleado -> userprincipalname);
+            $telefono = Arr::first($empleado ->telephonenumber);
+
+            // ENVIO DE DATOS A SERVICESKIT
+            
+
+            // $supervisor_email = $request['supervisor'];
+            // 'registrado_por' => Auth::user()->username ,
+           
+            $detalles_solicititud ='USUARIO:'.' '.$usuario.' | '.'NOMBRE :'.' '.$nombrecompleto.' | '.'PUESTO :'.' '.$puesto.' | '.'DEPARTAMENTO :'.''.$departamento.' | '.'LOCALIDAD :'.' '.$localidad;
+            $subject = 'SALIDA DE EMPLEADO :'.' '.$nombrecompleto; 
+            $Urs ='http://servicekit.viva.com.do/servlets/RequestServlet?';
+      
             // Parametros
             $query =[
                               
@@ -163,30 +261,21 @@ class SolicitudController extends Controller
             // DESPUES DE OBTENER EL RESULTADO LO ASIGNAMOS CON EL CODIGO DE SERVICESKIT MAS ABAJO
 
                 return Solicitud::create([
-                    'tipo' =>  1,
-                    'prioridad' =>'normal',
+                    'tipo' =>  2,
+                    'prioridad' =>'alta',
                     'serviceskit' =>  $serviceskit_id,
-                    'identidad' =>   $cedula,
-                    'nombres' => $nombres,
-                    'apellidos' => $apellidos,
+                    'identidad' =>   $usuario,
                     'nombre_completo' =>$nombrecompleto,
                     'departamento' => $departamento,
+                    'correo_electronico' => $correo_electronico,
                     'puesto' => $puesto,
                     'localidad' => $localidad,
-                    'supervisor' => $supervisor,
+                    'supervisor' => $supervisor_nombre,
                     'registrado_por' => Auth::user()->username ,
                     'modificado_por' => Auth::user()->username , 
                 ]);
-
-
-        // } catch (\Exception $e) {
-
-        //     return 'No se pudo completar';
             
-        //     }
-
-    }
-
+        }
 
     public function postSalida(Request $request)
     {   
@@ -198,7 +287,7 @@ class SolicitudController extends Controller
             $supervisor_email = $request['salida_supervisor'];
             // 'registrado_por' => Auth::user()->username ,
            
-            $detalles_solicititud ='CEDULA :'.' '.$cedula.' | '.'NOMBRE :'.' '.$nombrecompleto.' | '.'PUESTO :'.' '.$puesto.' | '.'SUPERVISOR :'.' '.$supervisor_email.' | '.'LOCALIDAD :'.' '.$localidad;
+            $detalles_solicititud ='USUARIO :'.' '.$usuario.' | '.'NOMBRE :'.' '.$nombrecompleto.' | '.'PUESTO :'.' '.$puesto.' | '.'SUPERVISOR :'.' '.$supervisor.' | '.'LOCALIDAD :'.' '.$localidad;
             $subject = 'SALIDA DE EMPLEADO :'.' '.$nombrecompleto; 
 
           $Urs ='http://servicekit.viva.com.do/servlets/RequestServlet?';
@@ -287,13 +376,23 @@ class SolicitudController extends Controller
             // $search->select(['cn', 'samaccountname', 'telephone', 'mail']);
             // admwfermin@om.do
 
+
+
+            
+
+            $buscar_supervisor = Adldap::search()->findByOrFail('samaccountname','uprueba');
+
+            $first = Arr::first($buscar_supervisor->name);
+            // $buscar_supervisor = Adldap::search()->findByOrFail('userprincipalname',  $request['supervisor']);
+           dd($empleado);
+
             //  $results = Adldap::search()->find('admwfermin');
                         // Adldap::search()->findByOrFail('samaccountname',  $request['supervisor'])->select('name');
-             $buscar_departamento = Departamento::findOrFail(3);
+            //  $buscarfirst_departamento = Departamento::findOrFail(3);
 
             //  $results = Adldap::search()->findByOrFail('userprincipalname', 'admwfermin@om.do');
 
-            dd($buscar_departamento->nombre);
+            // dd($buscar_departamento->nombre);
 
             // TRABAJANDO  CON GUZZLE 6
             // http://docs.guzzlephp.org/en/stable/request-options.html?highlight=format

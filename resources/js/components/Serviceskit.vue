@@ -18,8 +18,11 @@
                   data-toggle="dropdown"
                   aria-haspopup="true"
                   aria-expanded="false"
-                >Solicitud</button>
+                >
+                  <i class="fas fa-exchange-alt"></i> Solicitud
+                </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                  <!-- AQUI LAS OPCIONES -->
                   <button
                     class="dropdown-item btn-sm btn-block"
                     type="button"
@@ -27,6 +30,7 @@
                   >
                     <i class="fa fa-user-plus text-center" aria-hidden="true"></i> Nuevo Ingreso
                   </button>
+                  <li class="divider"></li>
                   <button
                     class="dropdown-item btn-sm btn-block"
                     type="button"
@@ -34,6 +38,7 @@
                   >
                     <i class="fa fa-user-times text-center" aria-hidden="true"></i> Desahucio
                   </button>
+                  <!-- FIN DE LAS OPCIONES -->
                 </div>
               </div>
             </div>
@@ -74,7 +79,7 @@
                       class="btn btn-outline-primary btn-sm btn-block"
                     >Modificacion</button>
                   </td>
-                  <td>{{ solicitud.nombres | capitalize }} {{solicitud.apellidos | capitalize}}</td>
+                  <td>{{ solicitud.nombre_completo | capitalize }}</td>
                   <td>{{ solicitud.puesto | capitalize }}</td>
                   <td v-if="solicitud.estado=='Abierto'">
                     <toggle-button
@@ -101,7 +106,7 @@
                   <td v-if="solicitud.Prioridad =='normal'">
                     <button type="button" class="btn btn-outline-primary btn-sm btn-block">Normal</button>
                   </td>
-                  <td v-else-if="solicitud.Prioridad =='baja'">
+                  <td v-else-if="solicitud.Prioridad =='alta'">
                     <button type="button" class="btn btn-outline-danger btn-sm btn-block">Alta</button>
                   </td>
                   <td v-else>
@@ -507,7 +512,12 @@
                   >
                     <i class="fas fa-search"></i> Buscar
                   </button>
-                  <button v-show="mostrar" type="submit" class="btn btn-outline-success">
+                  <button
+                    v-show="mostrar"
+                    type="submit"
+                    class="btn btn-outline-success"
+                    @click.prevent="deleteSalida(empleado_usuario )"
+                  >
                     <i class="fas fa-paper-plane"></i> Enviar
                   </button>
                 </div>
@@ -532,6 +542,7 @@ export default {
       // Cuando inicia oculta los demas input en el modal Desahucio
       mostrar: false,
       salida: false,
+      is_valido: false,
       //   dynamicValue: false,
       db_solicitudes: {},
       db_empleados: {},
@@ -581,6 +592,9 @@ export default {
       $("#addnew").modal("show");
     },
 
+    // ----------------------------------------------------------------------------
+    // PETICIONES TIPO - POST
+    // ----------------------------------------------------------------------------
     postIngreso() {
       // 1- Cargo el progress bar
       this.$Progress.start();
@@ -607,6 +621,47 @@ export default {
           this.$Progress.fail();
         });
     },
+    // ----------------------------------------------------------------------------
+    // PETICIONES TIPO - DELETE
+    // ----------------------------------------------------------------------------
+    deleteSalida(empleado_usuario) {
+      if (this.is_valido) {
+        $("#modal-detalles").modal("hide");
+        swal
+          .fire({
+            title: "<strong >ATENCION !</strong> ",
+            html:
+              "Esta haciendo una solicitud de<strong> salida del empleado </strong> <br> " +
+              "<h2>" +
+              this.empleado_nombre +
+              "</h2>",
+            type: "info",
+            footer:
+              '<button type="button" class="btn-block btn btn-outline-primary">Esta accion genera un ticket en <strong>serviceskit</strong> </button>',
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si, realizar la solicitud"
+          })
+          .then(result => {
+            if (result.value) {
+              this.$Progress.start();
+              //Envio el request al servidor - backend
+              axios.delete("/deleteSalida/" + empleado_usuario).then(() => {
+                toast.fire({
+                  type: "success",
+                  title: "Solicitud realizada exitosamente"
+                });
+                this.modalCierre();
+                Fire.$emit("RecargarData");
+                this.$Progress.finish();
+              });
+            }
+            this.modalCierre();
+          });
+      }
+    },
+
     // VENTANA MODAL - MODAL DE INFORMACION
     Informacion: function(solicitud) {
       this.mostrar = true;
@@ -676,34 +731,21 @@ export default {
             this.$Progress.start();
             // console.log((this.db_empleados = response.data.description));
             this.mostrar = true;
-
+            this.is_valido = true;
             this.db_empleados = response.data;
             // NOMBRES COMPLEETO
             this.empleado_nombre = response.data.name;
-
-            // NOMBRES
-            this.formSalida.salida_Nombres = response.data.givenname;
-            // APELLIDOS
-            this.formSalida.salida_Nombres = response.data.sn;
-            // USUARIO
             this.empleado_usuario = response.data.samaccountname;
-            this.formSalida.salida_usuaio = response.data.samaccountname;
             // DEPARTAMENTO
             this.empleado_departamento = response.data.department;
-            this.formSalida.salida_departamento = response.data.department;
             // PUESTO
             this.empleado_puesto = response.data.description;
-            this.formSalida.salida_Puesto = response.data.description;
             // LOCALIDAD
             this.empleado_localidad = response.data.physicaldeliveryofficename;
-            this.formSalida.salida_localidad =
-              response.data.physicaldeliveryofficename;
             // EMAIL
             this.empleado_email = response.data.userprincipalname;
             // SUPERVISOR
             this.empleado_supervisor = response.data.manager;
-            this.formSalida.salida_supervisor = response.data.manager;
-
             this.$Progress.finish();
           })
           .catch(e => {
@@ -711,9 +753,9 @@ export default {
           });
       }
     },
-    postSalida() {
-      console.log("estas en postSalida");
-    },
+
+    // ----------------------------------------------------------------------------
+    // PETICIONES TIPO - GET
     // ----------------------------------------------------------------------------
 
     getSolicitudes() {
