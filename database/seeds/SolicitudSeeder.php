@@ -49,6 +49,7 @@ class SolicitudSeeder extends Seeder
          DB::table('solicituds')->insert([
             'Tipo' => '2',
             'serviceskit' => '20207',
+            'identidad' => '00112960027',
             'nombres' =>'Hipolito ',
             'apellidos' => 'Mejia L.',
             'nombre_completo'=>'Hipolito Mejia L.',

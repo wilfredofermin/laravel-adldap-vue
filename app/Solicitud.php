@@ -9,7 +9,7 @@ class Solicitud extends Model
      protected $fillable = [
         'tipo',
         'serviceskit',
-        'cedula',
+        'identidad',
         'nombres',
         'nombre_completo',
         'apellidos',

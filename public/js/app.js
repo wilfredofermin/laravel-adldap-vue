@@ -1925,20 +1925,6 @@ module.exports = {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 //
 //
 //
@@ -2465,8 +2451,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
-    var _Form;
-
     return {
       activo: false,
       // Cuando inicia oculta los demas input en el modal Desahucio
@@ -2490,6 +2474,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       empleado_departamento: null,
       empleado_localidad: null,
       empleado_puesto: null,
+      solicitante: null,
       identidad_info: null,
       supervisor_info: null,
       form: new Form({
@@ -2502,12 +2487,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         puesto: "",
         localidad: "",
         supervisor: ""
-      }),
-      formSalida: new Form((_Form = {
-        salida_usuaio: "",
-        salida_Nombres: "",
-        salida_apellidos: ""
-      }, _defineProperty(_Form, "salida_apellidos", ""), _defineProperty(_Form, "salida_Puesto", ""), _defineProperty(_Form, "salida_departamento", ""), _defineProperty(_Form, "salida_localidad", ""), _defineProperty(_Form, "salida_supervisor", ""), _Form))
+      })
     };
   },
   methods: {
@@ -2588,7 +2568,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     // VENTANA MODAL - MODAL DE INFORMACION
     Informacion: function Informacion(solicitud) {
       this.mostrar = true;
-      this.salida = false;
+      this.is_valido = false;
+
+      if (solicitud.tipo === 1) {
+        this.salida = false;
+      } else {
+        this.salida = true;
+      }
+
       this.modalDetalles(); // NOMBRE COMPLETO
 
       this.empleado_nombre = solicitud.nombre_completo; // IDENTIDAD
@@ -2603,7 +2590,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       this.empleado_email = solicitud.correo_electronico; // SUPERVISOR
 
-      this.empleado_supervisor = solicitud.supervisor; // axios.get("/infoSolicitud/" + solicitud.id).then(response => {
+      this.empleado_supervisor = solicitud.supervisor; // SOLICITANTE
+
+      this.solicitante = solicitud.registrado_por; // axios.get("/infoSolicitud/" + solicitud.id).then(response => {
       //   this.nombre_completo =
       //     response.data.nombres + " " + response.data.apellidos;
       //   this.identidad_info = response.data.identidad;
@@ -61012,8 +61001,7 @@ var render = function() {
                       },
                       [
                         _c("i", {
-                          staticClass: "fa fa-user-plus text-center",
-                          attrs: { "aria-hidden": "true" }
+                          staticClass: "fas fa-arrow-alt-circle-right"
                         }),
                         _vm._v(" Nuevo Ingreso\n                ")
                       ]
@@ -61034,10 +61022,9 @@ var render = function() {
                       },
                       [
                         _c("i", {
-                          staticClass: "fa fa-user-times text-center",
-                          attrs: { "aria-hidden": "true" }
+                          staticClass: "fas fa-arrow-alt-circle-left"
                         }),
-                        _vm._v(" Desahucio\n                ")
+                        _vm._v(" Salida Empleado\n                ")
                       ]
                     )
                   ]
@@ -61069,29 +61056,9 @@ var render = function() {
                       _c("td", [_vm._v(_vm._s(solicitud.serviceskit))]),
                       _vm._v(" "),
                       solicitud.tipo == 1
-                        ? _c("td", [
-                            _c(
-                              "button",
-                              {
-                                staticClass:
-                                  "btn btn-outline-primary btn-sm btn-block",
-                                attrs: { type: "button" }
-                              },
-                              [_vm._v("Ingreso")]
-                            )
-                          ])
+                        ? _c("td", [_vm._m(2, true)])
                         : solicitud.tipo == 2
-                        ? _c("td", [
-                            _c(
-                              "button",
-                              {
-                                staticClass:
-                                  "btn btn-outline-danger btn-sm btn-block",
-                                attrs: { type: "button" }
-                              },
-                              [_vm._v("Desahucio")]
-                            )
-                          ])
+                        ? _c("td", [_vm._m(3, true)])
                         : _c("td", [
                             _c(
                               "button",
@@ -61233,7 +61200,7 @@ var render = function() {
                 },
                 [
                   _c("div", { staticClass: "modal-content" }, [
-                    _vm._m(2),
+                    _vm._m(4),
                     _vm._v(" "),
                     _c("div", { staticClass: "modal-body" }, [
                       _c("div", { staticClass: "card card-header" }, [
@@ -61244,7 +61211,7 @@ var render = function() {
                                 "div",
                                 { staticClass: "input-group mb-3" },
                                 [
-                                  _vm._m(3),
+                                  _vm._m(5),
                                   _vm._v(" "),
                                   _c("input", {
                                     directives: [
@@ -61305,7 +61272,7 @@ var render = function() {
                                 "div",
                                 { staticClass: "input-group mb-3" },
                                 [
-                                  _vm._m(4),
+                                  _vm._m(6),
                                   _vm._v(" "),
                                   _c("input", {
                                     directives: [
@@ -61362,7 +61329,7 @@ var render = function() {
                                 "div",
                                 { staticClass: "input-group mb-3" },
                                 [
-                                  _vm._m(5),
+                                  _vm._m(7),
                                   _vm._v(" "),
                                   _c("input", {
                                     directives: [
@@ -61424,7 +61391,7 @@ var render = function() {
                                 "div",
                                 { staticClass: "input-group mb-3" },
                                 [
-                                  _vm._m(6),
+                                  _vm._m(8),
                                   _vm._v(" "),
                                   _c("input", {
                                     directives: [
@@ -61483,7 +61450,7 @@ var render = function() {
                                 "div",
                                 { staticClass: "input-group mb-3" },
                                 [
-                                  _vm._m(7),
+                                  _vm._m(9),
                                   _vm._v(" "),
                                   _c("input", {
                                     directives: [
@@ -61807,7 +61774,7 @@ var render = function() {
                               "div",
                               { staticClass: "input-group mb-3" },
                               [
-                                _vm._m(8),
+                                _vm._m(10),
                                 _vm._v(" "),
                                 _c("input", {
                                   directives: [
@@ -61855,7 +61822,7 @@ var render = function() {
                         ])
                       ]),
                       _vm._v(" "),
-                      _vm._m(9)
+                      _vm._m(11)
                     ])
                   ])
                 ]
@@ -61915,10 +61882,10 @@ var render = function() {
                           ],
                           staticClass: "modal-title"
                         },
-                        [_vm._v("DETALLES DEL USUARIO")]
+                        [_vm._v("SOLICITUD DE INGRESO")]
                       ),
                       _vm._v(" "),
-                      _vm._m(10)
+                      _vm._m(12)
                     ]),
                     _vm._v(" "),
                     _c("div", { staticClass: "modal-body" }, [
@@ -61938,7 +61905,7 @@ var render = function() {
                               staticClass: "input-group mb-3"
                             },
                             [
-                              _vm._m(11),
+                              _vm._m(13),
                               _vm._v(" "),
                               _c("input", {
                                 directives: [
@@ -62010,7 +61977,7 @@ var render = function() {
                                       : "bg-primary"
                                 },
                                 [
-                                  _vm._m(12),
+                                  _vm._m(14),
                                   _vm._v(" "),
                                   _c(
                                     "h3",
@@ -62052,37 +62019,6 @@ var render = function() {
                                         attrs: { href: "#" }
                                       },
                                       [
-                                        _c("input", {
-                                          directives: [
-                                            {
-                                              name: "model",
-                                              rawName: "v-model",
-                                              value: _vm.formSalida.usuario,
-                                              expression: "formSalida.usuario"
-                                            }
-                                          ],
-                                          ref: "usuario",
-                                          attrs: {
-                                            type: "text",
-                                            name: "usuario",
-                                            hidden: ""
-                                          },
-                                          domProps: {
-                                            value: _vm.formSalida.usuario
-                                          },
-                                          on: {
-                                            input: function($event) {
-                                              if ($event.target.composing) {
-                                                return
-                                              }
-                                              _vm.$set(
-                                                _vm.formSalida,
-                                                "usuario",
-                                                $event.target.value
-                                              )
-                                            }
-                                          }
-                                        }),
                                         _vm._v(
                                           "\n                            Usuario\n                            "
                                         ),
@@ -62114,39 +62050,6 @@ var render = function() {
                                         attrs: { href: "#" }
                                       },
                                       [
-                                        _c("input", {
-                                          directives: [
-                                            {
-                                              name: "model",
-                                              rawName: "v-model",
-                                              value:
-                                                _vm.formSalida.departamento,
-                                              expression:
-                                                "formSalida.departamento"
-                                            }
-                                          ],
-                                          ref: "departamento",
-                                          attrs: {
-                                            type: "text",
-                                            name: "departamento",
-                                            hidden: ""
-                                          },
-                                          domProps: {
-                                            value: _vm.formSalida.departamento
-                                          },
-                                          on: {
-                                            input: function($event) {
-                                              if ($event.target.composing) {
-                                                return
-                                              }
-                                              _vm.$set(
-                                                _vm.formSalida,
-                                                "departamento",
-                                                $event.target.value
-                                              )
-                                            }
-                                          }
-                                        }),
                                         _vm._v(
                                           "\n                            Departamento\n                            "
                                         ),
@@ -62170,36 +62073,38 @@ var render = function() {
                                     )
                                   ]),
                                   _vm._v(" "),
-                                  _c("li", { staticClass: "nav-item" }, [
-                                    _c(
-                                      "a",
-                                      {
-                                        staticClass: "nav-link",
-                                        attrs: { href: "#" }
-                                      },
-                                      [
-                                        _vm._v(
-                                          "\n                            Correo Electronico\n                            "
-                                        ),
+                                  _vm.empleado_email
+                                    ? _c("li", { staticClass: "nav-item" }, [
                                         _c(
-                                          "span",
+                                          "a",
                                           {
-                                            staticClass:
-                                              "description-text float-right"
+                                            staticClass: "nav-link",
+                                            attrs: { href: "#" }
                                           },
                                           [
                                             _vm._v(
-                                              _vm._s(
-                                                _vm._f("capitalize")(
-                                                  _vm.empleado_email
+                                              "\n                            Correo Electronico\n                            "
+                                            ),
+                                            _c(
+                                              "span",
+                                              {
+                                                staticClass:
+                                                  "description-text float-right"
+                                              },
+                                              [
+                                                _vm._v(
+                                                  _vm._s(
+                                                    _vm._f("capitalize")(
+                                                      _vm.empleado_email
+                                                    )
+                                                  )
                                                 )
-                                              )
+                                              ]
                                             )
                                           ]
                                         )
-                                      ]
-                                    )
-                                  ]),
+                                      ])
+                                    : _vm._e(),
                                   _vm._v(" "),
                                   _c("li", { staticClass: "nav-item" }, [
                                     _c(
@@ -62209,37 +62114,6 @@ var render = function() {
                                         attrs: { href: "#" }
                                       },
                                       [
-                                        _c("input", {
-                                          directives: [
-                                            {
-                                              name: "model",
-                                              rawName: "v-model",
-                                              value: _vm.formSalida.localidad,
-                                              expression: "formSalida.localidad"
-                                            }
-                                          ],
-                                          ref: "localidad",
-                                          attrs: {
-                                            type: "text",
-                                            name: "localidad",
-                                            hidden: ""
-                                          },
-                                          domProps: {
-                                            value: _vm.formSalida.localidad
-                                          },
-                                          on: {
-                                            input: function($event) {
-                                              if ($event.target.composing) {
-                                                return
-                                              }
-                                              _vm.$set(
-                                                _vm.formSalida,
-                                                "localidad",
-                                                $event.target.value
-                                              )
-                                            }
-                                          }
-                                        }),
                                         _vm._v(
                                           "\n                            Localidad\n                            "
                                         ),
@@ -62271,38 +62145,6 @@ var render = function() {
                                         attrs: { href: "#" }
                                       },
                                       [
-                                        _c("input", {
-                                          directives: [
-                                            {
-                                              name: "model",
-                                              rawName: "v-model",
-                                              value: _vm.formSalida.supervisor,
-                                              expression:
-                                                "formSalida.supervisor"
-                                            }
-                                          ],
-                                          ref: "supervisor",
-                                          attrs: {
-                                            type: "text",
-                                            name: "supervisor",
-                                            hidden: ""
-                                          },
-                                          domProps: {
-                                            value: _vm.formSalida.supervisor
-                                          },
-                                          on: {
-                                            input: function($event) {
-                                              if ($event.target.composing) {
-                                                return
-                                              }
-                                              _vm.$set(
-                                                _vm.formSalida,
-                                                "supervisor",
-                                                $event.target.value
-                                              )
-                                            }
-                                          }
-                                        }),
                                         _vm._v(
                                           "\n                            Supervisor\n                            "
                                         ),
@@ -62321,6 +62163,48 @@ var render = function() {
                                               )
                                             )
                                           ]
+                                        )
+                                      ]
+                                    )
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("li", { staticClass: "nav-item" }, [
+                                    _c(
+                                      "a",
+                                      {
+                                        staticClass: "nav-link",
+                                        attrs: { href: "#" }
+                                      },
+                                      [
+                                        _vm._v(
+                                          "\n                            Solicitado por:\n                            "
+                                        ),
+                                        _c(
+                                          "span",
+                                          {
+                                            staticClass:
+                                              "description-text float-right"
+                                          },
+                                          [
+                                            _c(
+                                              "Button",
+                                              {
+                                                staticClass:
+                                                  "btn btn-block btn-outline-primary btn-sm",
+                                                attrs: { type: "button" }
+                                              },
+                                              [
+                                                _vm._v(
+                                                  _vm._s(
+                                                    _vm._f("capitalize")(
+                                                      _vm.solicitante
+                                                    )
+                                                  )
+                                                )
+                                              ]
+                                            )
+                                          ],
+                                          1
                                         )
                                       ]
                                     )
@@ -62348,7 +62232,10 @@ var render = function() {
                               }
                             }
                           },
-                          [_vm._v("Cerrar")]
+                          [
+                            _c("i", { staticClass: "fas fa-times-circle" }),
+                            _vm._v(" Cerrar\n              ")
+                          ]
                         ),
                         _vm._v(" "),
                         _c(
@@ -62397,8 +62284,8 @@ var render = function() {
                                   {
                                     name: "show",
                                     rawName: "v-show",
-                                    value: _vm.mostrar,
-                                    expression: "mostrar"
+                                    value: _vm.is_valido,
+                                    expression: "is_valido"
                                   }
                                 ],
                                 staticClass: "btn btn-outline-success",
@@ -62413,7 +62300,7 @@ var render = function() {
                                 }
                               },
                               [
-                                _c("i", { staticClass: "fas fa-paper-plane" }),
+                                _c("i", { staticClass: "fas fa-check-circle" }),
                                 _vm._v(" Enviar\n                ")
                               ]
                             )
@@ -62477,6 +62364,38 @@ var staticRenderFns = [
         _c("th", { attrs: { width: "5%" } }, [_vm._v("Prioridad")])
       ])
     ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "button",
+      {
+        staticClass: "btn btn-outline-primary btn-sm btn-block",
+        attrs: { type: "button" }
+      },
+      [
+        _c("i", { staticClass: "fas fa-arrow-alt-circle-right" }),
+        _vm._v(" Ingreso\n                  ")
+      ]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "button",
+      {
+        staticClass: "btn btn-outline-danger btn-sm btn-block",
+        attrs: { type: "button" }
+      },
+      [
+        _c("i", { staticClass: "fas fa-arrow-alt-circle-left" }),
+        _vm._v(" Salida\n                  ")
+      ]
+    )
   },
   function() {
     var _vm = this
@@ -62557,7 +62476,7 @@ var staticRenderFns = [
     var _c = _vm._self._c || _h
     return _c("div", { staticClass: "input-group-prepend" }, [
       _c("span", { staticClass: "input-group-text" }, [
-        _c("i", { staticClass: "fas fa-envelope" })
+        _c("i", { staticClass: "fas fa-eye" })
       ])
     ])
   },
@@ -62570,7 +62489,7 @@ var staticRenderFns = [
         "button",
         { staticClass: "btn btn-outline-success", attrs: { type: "submit" } },
         [
-          _c("i", { staticClass: "fas fa-paper-plane" }),
+          _c("i", { staticClass: "fas fa-check-circle" }),
           _vm._v(" Enviar\n                ")
         ]
       )

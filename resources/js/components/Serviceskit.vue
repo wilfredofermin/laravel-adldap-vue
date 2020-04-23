@@ -28,7 +28,7 @@
                     type="button"
                     @click="modalIngreso()"
                   >
-                    <i class="fa fa-user-plus text-center" aria-hidden="true"></i> Nuevo Ingreso
+                    <i class="fas fa-arrow-alt-circle-right"></i> Nuevo Ingreso
                   </button>
                   <li class="divider"></li>
                   <button
@@ -36,7 +36,7 @@
                     type="button"
                     @click="getEmpleado()"
                   >
-                    <i class="fa fa-user-times text-center" aria-hidden="true"></i> Desahucio
+                    <i class="fas fa-arrow-alt-circle-left"></i> Salida Empleado
                   </button>
                   <!-- FIN DE LAS OPCIONES -->
                 </div>
@@ -68,10 +68,14 @@
                   <td>{{ solicitud.serviceskit }}</td>
 
                   <td v-if="solicitud.tipo ==1">
-                    <button type="button" class="btn btn-outline-primary btn-sm btn-block">Ingreso</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm btn-block">
+                      <i class="fas fa-arrow-alt-circle-right"></i> Ingreso
+                    </button>
                   </td>
                   <td v-else-if="solicitud.tipo ==2">
-                    <button type="button" class="btn btn-outline-danger btn-sm btn-block">Desahucio</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm btn-block">
+                      <i class="fas fa-arrow-alt-circle-left"></i> Salida
+                    </button>
                   </td>
                   <td v-else>
                     <button
@@ -339,7 +343,7 @@
                       <div class="input-group mb-3">
                         <div class="input-group-prepend">
                           <span class="input-group-text">
-                            <i class="fas fa-envelope"></i>
+                            <i class="fas fa-eye"></i>
                           </span>
                         </div>
                         <input
@@ -356,10 +360,9 @@
                     </div>
                   </div>
                 </div>
-
                 <div class="modal-footer">
                   <button type="submit" class="btn btn-outline-success">
-                    <i class="fas fa-paper-plane"></i> Enviar
+                    <i class="fas fa-check-circle"></i> Enviar
                   </button>
                 </div>
               </div>
@@ -374,7 +377,7 @@
             <div class="modal-content">
               <div class="modal-header">
                 <h4 v-show="salida" class="modal-title">SOLICITUD DE SALIDAD</h4>
-                <h4 v-show="!salida" class="modal-title">DETALLES DEL USUARIO</h4>
+                <h4 v-show="!salida" class="modal-title">SOLICITUD DE INGRESO</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
@@ -423,13 +426,6 @@
                         <ul class="nav flex-column">
                           <li class="nav-item">
                             <a href="#" class="nav-link">
-                              <input
-                                type="text"
-                                v-model="formSalida.usuario"
-                                name="usuario"
-                                ref="usuario"
-                                hidden
-                              />
                               Usuario
                               <span
                                 class="description-text float-right"
@@ -438,20 +434,13 @@
                           </li>
                           <li class="nav-item">
                             <a href="#" class="nav-link">
-                              <input
-                                type="text"
-                                v-model="formSalida.departamento"
-                                name="departamento"
-                                ref="departamento"
-                                hidden
-                              />
                               Departamento
                               <span
                                 class="description-text float-right"
                               >{{empleado_departamento | capitalize}}</span>
                             </a>
                           </li>
-                          <li class="nav-item">
+                          <li class="nav-item" v-if="empleado_email">
                             <a href="#" class="nav-link">
                               Correo Electronico
                               <span
@@ -461,13 +450,6 @@
                           </li>
                           <li class="nav-item">
                             <a href="#" class="nav-link">
-                              <input
-                                type="text"
-                                v-model="formSalida.localidad"
-                                name="localidad"
-                                ref="localidad"
-                                hidden
-                              />
                               Localidad
                               <span
                                 class="description-text float-right"
@@ -476,17 +458,21 @@
                           </li>
                           <li class="nav-item">
                             <a href="#" class="nav-link">
-                              <input
-                                type="text"
-                                v-model="formSalida.supervisor"
-                                name="supervisor"
-                                ref="supervisor"
-                                hidden
-                              />
                               Supervisor
                               <span
                                 class="description-text float-right"
                               >{{empleado_supervisor | capitalize}}</span>
+                            </a>
+                          </li>
+                          <li class="nav-item">
+                            <a href="#" class="nav-link">
+                              Solicitado por:
+                              <span class="description-text float-right">
+                                <Button
+                                  class="btn btn-block btn-outline-primary btn-sm"
+                                  type="button"
+                                >{{solicitante | capitalize}}</Button>
+                              </span>
                             </a>
                           </li>
                         </ul>
@@ -502,7 +488,9 @@
                   class="btn btn-outline-danger"
                   data-dismiss="modal"
                   @click="modalCierre()"
-                >Cerrar</button>
+                >
+                  <i class="fas fa-times-circle"></i> Cerrar
+                </button>
                 <div v-show="salida">
                   <button
                     v-show="!mostrar"
@@ -513,12 +501,12 @@
                     <i class="fas fa-search"></i> Buscar
                   </button>
                   <button
-                    v-show="mostrar"
+                    v-show="is_valido"
                     type="submit"
                     class="btn btn-outline-success"
                     @click.prevent="deleteSalida(empleado_usuario )"
                   >
-                    <i class="fas fa-paper-plane"></i> Enviar
+                    <i class="fas fa-check-circle"></i> Enviar
                   </button>
                 </div>
               </div>
@@ -560,6 +548,7 @@ export default {
       empleado_departamento: null,
       empleado_localidad: null,
       empleado_puesto: null,
+      solicitante: null,
       identidad_info: null,
       supervisor_info: null,
       form: new Form({
@@ -572,16 +561,6 @@ export default {
         puesto: "",
         localidad: "",
         supervisor: ""
-      }),
-      formSalida: new Form({
-        salida_usuaio: "",
-        salida_Nombres: "",
-        salida_apellidos: "",
-        salida_apellidos: "",
-        salida_Puesto: "",
-        salida_departamento: "",
-        salida_localidad: "",
-        salida_supervisor: ""
       })
     };
   },
@@ -665,7 +644,12 @@ export default {
     // VENTANA MODAL - MODAL DE INFORMACION
     Informacion: function(solicitud) {
       this.mostrar = true;
-      this.salida = false;
+      this.is_valido = false;
+      if (solicitud.tipo === 1) {
+        this.salida = false;
+      } else {
+        this.salida = true;
+      }
       this.modalDetalles();
 
       // NOMBRE COMPLETO
@@ -682,6 +666,8 @@ export default {
       this.empleado_email = solicitud.correo_electronico;
       // SUPERVISOR
       this.empleado_supervisor = solicitud.supervisor;
+      // SOLICITANTE
+      this.solicitante = solicitud.registrado_por;
 
       // axios.get("/infoSolicitud/" + solicitud.id).then(response => {
       //   this.nombre_completo =
