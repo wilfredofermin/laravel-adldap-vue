@@ -2456,15 +2456,51 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
       activo: false,
       // Cuando inicia oculta los demas input en el modal Desahucio
-      mostrar: false,
+      mostrar_detalles: false,
       salida: false,
       is_valido: false,
       is_admin: false,
+      btn_procesado: false,
+      // CONTROLES DEL FORMULARIO
+      input_buscar: false,
+      btn_procesar_salidad: false,
+      btn_procesar_entrada: false,
+      btn_cerrar: true,
+      btn_enviar: false,
+      btn_buscar: false,
       //   dynamicValue: false,
       db_solicitudes: {},
       db_empleados: {},
@@ -2476,6 +2512,7 @@ __webpack_require__.r(__webpack_exports__);
       empleado_nombre: null,
       empleado_email: null,
       buscar_empleado: null,
+      empleado_id: null,
       empleado_usuario: null,
       empleado_supervisor: null,
       empleado_departamento: null,
@@ -2484,6 +2521,7 @@ __webpack_require__.r(__webpack_exports__);
       solicitante: null,
       identidad_info: null,
       supervisor_info: null,
+      tipoSolicitud: null,
       form: new Form({
         cedula: "",
         primer_nombre: "",
@@ -2532,9 +2570,6 @@ __webpack_require__.r(__webpack_exports__);
         _this.$Progress.fail();
       });
     },
-    postProcesar: function postProcesar() {
-      console.log("estas en postProcesar");
-    },
     // ----------------------------------------------------------------------------
     // PETICIONES TIPO - DELETE
     // ----------------------------------------------------------------------------
@@ -2550,23 +2585,32 @@ __webpack_require__.r(__webpack_exports__);
           showCancelButton: true,
           confirmButtonColor: "#3085d6",
           cancelButtonColor: "#d33",
-          confirmButtonText: "Si, realizar la solicitud"
+          confirmButtonText: "Si, realizar la solicitud",
+          showLoaderOnConfirm: true,
+          timerProgressBar: true
         }).then(function (result) {
           if (result.value) {
             _this2.$Progress.start(); //Envio el request al servidor - backend
 
 
-            axios["delete"]("/deleteSalida/" + empleado_usuario).then(function () {
+            return axios["delete"]("/deleteSalida/" + empleado_usuario).then(function (response) {
+              Fire.$emit("RecargarData");
               toast.fire({
                 type: "success",
                 title: "Solicitud realizada exitosamente"
               });
 
-              _this2.modalCierre();
-
-              Fire.$emit("RecargarData");
-
               _this2.$Progress.finish();
+
+              _this2.modalCierre();
+            })["catch"](function (error) {
+              // swal.showValidationMessage(`Request failed: ${error}`);
+              swal.fire({
+                icon: "error",
+                title: "Solicitud existente",
+                text: "Existe una solicitud vinculada a este empleado",
+                footer: "Validacion del usuario"
+              });
             });
           }
 
@@ -2576,9 +2620,12 @@ __webpack_require__.r(__webpack_exports__);
     },
     // VENTANA MODAL - MODAL DE INFORMACION
     Informacion: function Informacion(solicitud) {
-      this.mostrar = true;
-      this.is_admin = true;
-      this.is_valido = false;
+      // RESERVADO PARA EL ADMINISTRADOR - CONTROL DESDE EL FRONDEND
+      this.is_admin = true; //-----------------------------------------------------------
+
+      this.btn_enviar = false;
+      this.btn_buscar = false;
+      this.mostrar_detalles = true; // Esto le activa el color indicando cuando es de salida o entrada
 
       if (solicitud.tipo === 1) {
         this.salida = false;
@@ -2586,7 +2633,20 @@ __webpack_require__.r(__webpack_exports__);
         this.salida = true;
       }
 
-      this.modalDetalles(); // NOMBRE COMPLETO
+      if (solicitud.estado == "Abierto") {
+        this.btn_procesar_salidad = true;
+        this.btn_procesar_entrada = true;
+        this.btn_cerrar = true;
+        this.btn_procesado = false;
+      } else {
+        this.btn_procesar_salidad = false;
+        this.btn_procesar_entrada = false;
+        this.btn_procesado = true;
+        this.btn_cerrar = false;
+      }
+
+      this.modalDetalles();
+      this.empleado_id = solicitud.id; // NOMBRE COMPLETO
 
       this.empleado_nombre = solicitud.nombre_completo; // IDENTIDAD
 
@@ -2602,7 +2662,8 @@ __webpack_require__.r(__webpack_exports__);
 
       this.empleado_supervisor = solicitud.supervisor; // SOLICITANTE
 
-      this.solicitante = solicitud.solicitante_nombre; // axios.get("/infoSolicitud/" + solicitud.id).then(response => {
+      this.solicitante = solicitud.solicitante_nombre;
+      this.tipoSolicitud = solicitud.tipo; // axios.get("/infoSolicitud/" + solicitud.id).then(response => {
       //   this.nombre_completo =
       //     response.data.nombres + " " + response.data.apellidos;
       //   this.identidad_info = response.data.identidad;
@@ -2633,40 +2694,69 @@ __webpack_require__.r(__webpack_exports__);
     // ----------------------------------------------------------------------------
     // PETICIONES AL ACTIVE DIRECTORY
     // ----------------------------------------------------------------------------
-    getEmpleado: function getEmpleado() {
+    procesarSalida: function procesarSalida(empleado_id) {
       var _this3 = this;
 
-      this.salida = true;
-      this.mostrar = false;
-      this.detalles = true;
+      var buscar = empleado_id;
+      this.$Progress.start();
+      axios["delete"]("/procesarSalida/" + buscar).then(function (Response) {
+        Fire.$emit("RecargarData");
+        toast.fire({
+          type: "success",
+          title: "Solicitud realizada exitosamente"
+        });
+
+        _this3.$Progress.finish();
+
+        $("#modal-detalles").modal("hide");
+      });
+    },
+    getEmpleado: function getEmpleado() {
+      var _this4 = this;
+
+      this.input_buscar = true;
+      this.btn_buscar = true;
+      this.btn_cerrar = true;
+      this.mostrar_detalles = false;
+      this.btn_procesar_salidad = false;
+      this.btn_procesar_entrada = false;
+      this.btn_procesado = false;
       this.modalDetalles();
 
       if (this.buscar_empleado != null) {
         var buscar = this.buscar_empleado;
         axios.get("/getEmpleado?q=" + buscar).then(function (response) {
-          _this3.$Progress.start(); // console.log((this.db_empleados = response.data.description));
+          _this4.$Progress.start(); // console.log((this.db_empleados = response.data.description));
 
 
-          _this3.mostrar = true;
-          _this3.is_valido = true;
-          _this3.db_empleados = response.data; // NOMBRES COMPLEETO
+          _this4.btn_buscar = false;
+          _this4.btn_enviar = true;
+          _this4.mostrar_detalles = true;
+          _this4.is_valido = true;
+          _this4.db_empleados = response.data; // NOMBRES COMPLEETO
 
-          _this3.empleado_nombre = response.data.name;
-          _this3.empleado_usuario = response.data.samaccountname; // DEPARTAMENTO
+          _this4.empleado_nombre = response.data.name;
+          _this4.empleado_usuario = response.data.samaccountname; // DEPARTAMENTO
 
-          _this3.empleado_departamento = response.data.department; // PUESTO
+          _this4.empleado_departamento = response.data.department; // PUESTO
 
-          _this3.empleado_puesto = response.data.description; // LOCALIDAD
+          _this4.empleado_puesto = response.data.description; // LOCALIDAD
 
-          _this3.empleado_localidad = response.data.physicaldeliveryofficename; // EMAIL
+          _this4.empleado_localidad = response.data.physicaldeliveryofficename; // EMAIL
 
-          _this3.empleado_email = response.data.userprincipalname; // SUPERVISOR
+          _this4.empleado_email = response.data.userprincipalname; // SUPERVISOR
 
-          _this3.empleado_supervisor = response.data.manager;
+          _this4.empleado_supervisor = response.data.manager;
 
-          _this3.$Progress.finish();
-        })["catch"](function (e) {
-          console.log(e);
+          _this4.$Progress.finish();
+        })["catch"](function (error) {
+          // swal.showValidationMessage(`Request failed: ${error}`);
+          swal.fire({
+            icon: "error",
+            title: "USUARIO NO EXISTENTE!",
+            text: "Verifique el dato introducido",
+            footer: "<a href>Validacion del usuario?</a>"
+          });
         });
       }
     },
@@ -2674,21 +2764,21 @@ __webpack_require__.r(__webpack_exports__);
     // PETICIONES TIPO - GET
     // ----------------------------------------------------------------------------
     getSolicitudes: function getSolicitudes() {
-      var _this4 = this;
+      var _this5 = this;
 
       axios.get("/getSolicitudes").then(function (response) {
-        _this4.db_solicitudes = response.data;
+        _this5.db_solicitudes = response.data;
       });
     },
     getDepartamentos: function getDepartamentos() {
-      var _this5 = this;
+      var _this6 = this;
 
       axios.get("/getDepartamentos").then(function (response) {
-        _this5.data_departamentos = response.data;
+        _this6.data_departamentos = response.data;
       });
     },
     getPuestos: function getPuestos() {
-      var _this6 = this;
+      var _this7 = this;
 
       this.form.puesto = "";
 
@@ -2698,7 +2788,7 @@ __webpack_require__.r(__webpack_exports__);
             departamento_id: this.form.departamento
           }
         }).then(function (response) {
-          _this6.data_puestos = response.data;
+          _this7.data_puestos = response.data;
           document.getElementById("puesto").disabled = false;
         })["catch"](function (e) {
           console.log(e);
@@ -2709,23 +2799,23 @@ __webpack_require__.r(__webpack_exports__);
       document.getElementById("supervisor").disabled = false;
     },
     getLocalidad: function getLocalidad() {
-      var _this7 = this;
+      var _this8 = this;
 
       this.form.localidad = "";
       axios.get("/getLocalidad").then(function (response) {
-        _this7.data_localidad = response.data;
+        _this8.data_localidad = response.data;
         document.getElementById("localidad").disabled = false;
       });
     }
   },
   created: function created() {
-    var _this8 = this;
+    var _this9 = this;
 
     this.$Progress.start();
     this.getSolicitudes();
     this.getDepartamentos();
     Fire.$on("RecargarData", function () {
-      _this8.getSolicitudes();
+      _this9.getSolicitudes();
     });
     this.$Progress.finish();
   },
@@ -61891,67 +61981,105 @@ var render = function() {
                     _c("div", { staticClass: "modal-body" }, [
                       _c("div", { staticClass: "col-md-12" }, [
                         _c("div", { staticClass: "form-group" }, [
-                          _c(
-                            "div",
-                            {
-                              directives: [
-                                {
-                                  name: "show",
-                                  rawName: "v-show",
-                                  value: !_vm.mostrar,
-                                  expression: "!mostrar"
-                                }
-                              ],
-                              staticClass: "input-group mb-3"
-                            },
-                            [
-                              _vm._m(14),
-                              _vm._v(" "),
-                              _c("input", {
+                          _c("div", { staticClass: "col-md-11" }, [
+                            _c(
+                              "div",
+                              {
                                 directives: [
                                   {
-                                    name: "model",
-                                    rawName: "v-model",
-                                    value: _vm.buscar_empleado,
-                                    expression: "buscar_empleado"
+                                    name: "show",
+                                    rawName: "v-show",
+                                    value: !_vm.mostrar_detalles,
+                                    expression: "!mostrar_detalles"
                                   }
                                 ],
-                                ref: "buscar_empleado",
-                                staticClass: "form-control",
-                                attrs: {
-                                  placeholder:
-                                    "Por favor, indique el usuario del empleado",
-                                  type: "text",
-                                  name: "buscar_empleado",
-                                  id: "buscar_empleado"
-                                },
-                                domProps: { value: _vm.buscar_empleado },
-                                on: {
-                                  keyup: function($event) {
-                                    if (
-                                      !$event.type.indexOf("key") &&
-                                      _vm._k(
-                                        $event.keyCode,
-                                        "enter",
-                                        13,
-                                        $event.key,
-                                        "Enter"
-                                      )
-                                    ) {
-                                      return null
+                                staticClass: "input-group mb-3"
+                              },
+                              [
+                                _vm._m(14),
+                                _vm._v(" "),
+                                _c("input", {
+                                  directives: [
+                                    {
+                                      name: "show",
+                                      rawName: "v-show",
+                                      value: _vm.input_buscar,
+                                      expression: "input_buscar"
+                                    },
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: _vm.buscar_empleado,
+                                      expression: "buscar_empleado"
                                     }
-                                    return _vm.getEmpleado($event)
+                                  ],
+                                  ref: "buscar_empleado",
+                                  staticClass: "form-control",
+                                  attrs: {
+                                    placeholder:
+                                      "Por favor, indique el usuario del empleado",
+                                    type: "text",
+                                    name: "buscar_empleado",
+                                    id: "buscar_empleado"
                                   },
-                                  input: function($event) {
-                                    if ($event.target.composing) {
-                                      return
+                                  domProps: { value: _vm.buscar_empleado },
+                                  on: {
+                                    keyup: function($event) {
+                                      if (
+                                        !$event.type.indexOf("key") &&
+                                        _vm._k(
+                                          $event.keyCode,
+                                          "enter",
+                                          13,
+                                          $event.key,
+                                          "Enter"
+                                        )
+                                      ) {
+                                        return null
+                                      }
+                                      return _vm.getEmpleado($event)
+                                    },
+                                    input: function($event) {
+                                      if ($event.target.composing) {
+                                        return
+                                      }
+                                      _vm.buscar_empleado = $event.target.value
                                     }
-                                    _vm.buscar_empleado = $event.target.value
                                   }
-                                }
-                              })
-                            ]
-                          ),
+                                }),
+                                _vm._v(" "),
+                                _c("div", { staticClass: "col-md-1" }, [
+                                  _c(
+                                    "button",
+                                    {
+                                      directives: [
+                                        {
+                                          name: "show",
+                                          rawName: "v-show",
+                                          value: _vm.btn_buscar,
+                                          expression: "btn_buscar"
+                                        }
+                                      ],
+                                      staticClass: "btn btn-outline-primary",
+                                      attrs: { type: "button" },
+                                      on: {
+                                        click: function($event) {
+                                          $event.preventDefault()
+                                          return _vm.getEmpleado($event)
+                                        }
+                                      }
+                                    },
+                                    [
+                                      _c("i", { staticClass: "fas fa-search" }),
+                                      _vm._v(
+                                        " Buscar\n                        "
+                                      )
+                                    ]
+                                  )
+                                ])
+                              ]
+                            )
+                          ]),
                           _vm._v(" "),
                           _c(
                             "div",
@@ -61960,8 +62088,8 @@ var render = function() {
                                 {
                                   name: "show",
                                   rawName: "v-show",
-                                  value: _vm.mostrar,
-                                  expression: "mostrar"
+                                  value: _vm.mostrar_detalles,
+                                  expression: "mostrar_detalles"
                                 }
                               ],
                               staticClass: "card card-widget widget-user-2"
@@ -62137,36 +62265,38 @@ var render = function() {
                                     )
                                   ]),
                                   _vm._v(" "),
-                                  _c("li", { staticClass: "nav-item" }, [
-                                    _c(
-                                      "a",
-                                      {
-                                        staticClass: "nav-link",
-                                        attrs: { href: "#" }
-                                      },
-                                      [
-                                        _vm._v(
-                                          "\n                            Supervisor\n                            "
-                                        ),
+                                  _vm.empleado_supervisor
+                                    ? _c("li", { staticClass: "nav-item" }, [
                                         _c(
-                                          "span",
+                                          "a",
                                           {
-                                            staticClass:
-                                              "description-text float-right"
+                                            staticClass: "nav-link",
+                                            attrs: { href: "#" }
                                           },
                                           [
                                             _vm._v(
-                                              _vm._s(
-                                                _vm._f("capitalize")(
-                                                  _vm.empleado_supervisor
+                                              "\n                            Supervisor\n                            "
+                                            ),
+                                            _c(
+                                              "span",
+                                              {
+                                                staticClass:
+                                                  "description-text float-right"
+                                              },
+                                              [
+                                                _vm._v(
+                                                  _vm._s(
+                                                    _vm._f("capitalize")(
+                                                      _vm.empleado_supervisor
+                                                    )
+                                                  )
                                                 )
-                                              )
+                                              ]
                                             )
                                           ]
                                         )
-                                      ]
-                                    )
-                                  ]),
+                                      ])
+                                    : _vm._e(),
                                   _vm._v(" "),
                                   _vm.solicitante
                                     ? _c("li", { staticClass: "nav-item" }, [
@@ -62191,7 +62321,7 @@ var render = function() {
                                                   "Button",
                                                   {
                                                     staticClass:
-                                                      "btn btn-block btn-outline-primary btn-sm",
+                                                      "btn btn-block btn-outline-primary btn-sm disabled",
                                                     attrs: { type: "button" }
                                                   },
                                                   [
@@ -62226,6 +62356,14 @@ var render = function() {
                         _c(
                           "button",
                           {
+                            directives: [
+                              {
+                                name: "show",
+                                rawName: "v-show",
+                                value: _vm.btn_cerrar,
+                                expression: "btn_cerrar"
+                              }
+                            ],
                             staticClass: "btn btn-outline-danger",
                             attrs: { type: "button", "data-dismiss": "modal" },
                             on: {
@@ -62241,99 +62379,123 @@ var render = function() {
                         ),
                         _vm._v(" "),
                         _c(
-                          "div",
+                          "button",
                           {
                             directives: [
                               {
                                 name: "show",
                                 rawName: "v-show",
-                                value: _vm.salida,
-                                expression: "salida"
+                                value: _vm.btn_procesado,
+                                expression: "btn_procesado"
                               }
-                            ]
+                            ],
+                            staticClass: "btn btn-success btn-block",
+                            attrs: { type: "button", "data-dismiss": "modal" }
                           },
                           [
-                            _c(
-                              "button",
-                              {
-                                directives: [
-                                  {
-                                    name: "show",
-                                    rawName: "v-show",
-                                    value: !_vm.mostrar,
-                                    expression: "!mostrar"
-                                  }
-                                ],
-                                staticClass: "btn btn-outline-primary",
-                                attrs: { type: "button" },
-                                on: {
-                                  click: function($event) {
-                                    $event.preventDefault()
-                                    return _vm.getEmpleado($event)
-                                  }
-                                }
-                              },
-                              [
-                                _c("i", { staticClass: "fas fa-search" }),
-                                _vm._v(" Buscar\n                ")
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "button",
-                              {
-                                directives: [
-                                  {
-                                    name: "show",
-                                    rawName: "v-show",
-                                    value: _vm.is_valido,
-                                    expression: "is_valido"
-                                  }
-                                ],
-                                staticClass: "btn btn-outline-success",
-                                attrs: { type: "submit" },
-                                on: {
-                                  click: function($event) {
-                                    $event.preventDefault()
-                                    return _vm.deleteSalida(
-                                      _vm.empleado_usuario
-                                    )
-                                  }
-                                }
-                              },
-                              [
-                                _c("i", { staticClass: "fas fa-check-circle" }),
-                                _vm._v(" Enviar\n                ")
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "button",
-                              {
-                                directives: [
-                                  {
-                                    name: "show",
-                                    rawName: "v-show",
-                                    value: _vm.is_admin,
-                                    expression: "is_admin"
-                                  }
-                                ],
-                                staticClass: "btn btn-outline-success",
-                                attrs: { type: "buttton" },
-                                on: {
-                                  click: function($event) {
-                                    $event.preventDefault()
-                                    return _vm.postProcesar()
-                                  }
-                                }
-                              },
-                              [
-                                _c("i", { staticClass: "fas fa-check-circle" }),
-                                _vm._v(" Procesar\n                ")
-                              ]
+                            _c("i", { staticClass: "fas fa-clipboard-check" }),
+                            _vm._v(
+                              " Esta solicitud ha sido procesada\n              "
                             )
                           ]
-                        )
+                        ),
+                        _vm._v(" "),
+                        _c("div", [
+                          _c(
+                            "button",
+                            {
+                              directives: [
+                                {
+                                  name: "show",
+                                  rawName: "v-show",
+                                  value: _vm.btn_enviar,
+                                  expression: "btn_enviar"
+                                }
+                              ],
+                              staticClass: "btn btn-outline-success",
+                              attrs: { type: "submit" },
+                              on: {
+                                click: function($event) {
+                                  $event.preventDefault()
+                                  return _vm.deleteSalida(_vm.empleado_usuario)
+                                }
+                              }
+                            },
+                            [
+                              _c("i", { staticClass: "fas fa-check-circle" }),
+                              _vm._v(" Enviar\n                ")
+                            ]
+                          ),
+                          _vm._v(" "),
+                          _c(
+                            "div",
+                            {
+                              directives: [
+                                {
+                                  name: "show",
+                                  rawName: "v-show",
+                                  value: _vm.is_admin,
+                                  expression: "is_admin"
+                                }
+                              ]
+                            },
+                            [
+                              _vm.tipoSolicitud == 1
+                                ? _c(
+                                    "button",
+                                    {
+                                      directives: [
+                                        {
+                                          name: "show",
+                                          rawName: "v-show",
+                                          value: _vm.btn_procesar_entrada,
+                                          expression: "btn_procesar_entrada"
+                                        }
+                                      ],
+                                      staticClass: "btn btn-outline-primary",
+                                      attrs: { type: "button" }
+                                    },
+                                    [
+                                      _c("i", {
+                                        staticClass: "fas fa-check-circle"
+                                      }),
+                                      _vm._v(" Procesar\n                    "),
+                                      _c("strong", [_vm._v("Entrada")])
+                                    ]
+                                  )
+                                : _c(
+                                    "button",
+                                    {
+                                      directives: [
+                                        {
+                                          name: "show",
+                                          rawName: "v-show",
+                                          value: _vm.btn_procesar_salidad,
+                                          expression: "btn_procesar_salidad"
+                                        }
+                                      ],
+                                      staticClass: "btn btn-outline-danger",
+                                      attrs: { type: "button" },
+                                      on: {
+                                        click: function($event) {
+                                          $event.preventDefault()
+                                          return _vm.procesarSalida(
+                                            _vm.empleado_id
+                                          )
+                                        }
+                                      }
+                                    },
+                                    [
+                                      _c("i", {
+                                        staticClass: "fas fa-check-circle"
+                                      }),
+                                      _vm._v(" Procesar\n                    "),
+                                      _c("strong", [_vm._v("Salida")])
+                                    ]
+                                  )
+                            ]
+                          )
+                        ])
                       ]
                     )
                   ])

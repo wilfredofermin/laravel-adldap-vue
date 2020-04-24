@@ -384,25 +384,39 @@
               <div class="modal-body">
                 <div class="col-md-12">
                   <div class="form-group">
-                    <div v-show="!mostrar" class="input-group mb-3">
-                      <div class="input-group-prepend">
-                        <span class="input-group-text">
-                          <i class="fas fa-user"></i>
-                        </span>
+                    <div class="col-md-11">
+                      <div v-show="!mostrar_detalles" class="input-group mb-3">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text">
+                            <i class="fas fa-user"></i>
+                          </span>
+                        </div>
+                        <input
+                          placeholder="Por favor, indique el usuario del empleado"
+                          type="text"
+                          v-show="input_buscar"
+                          v-model="buscar_empleado"
+                          @keyup.enter="getEmpleado"
+                          name="buscar_empleado"
+                          ref="buscar_empleado"
+                          id="buscar_empleado"
+                          class="form-control"
+                        />
+                        <div class="col-md-1">
+                          <button
+                            v-show="btn_buscar"
+                            type="button"
+                            class="btn btn-outline-primary"
+                            @click.prevent="getEmpleado"
+                          >
+                            <i class="fas fa-search"></i> Buscar
+                          </button>
+                        </div>
                       </div>
-                      <input
-                        placeholder="Por favor, indique el usuario del empleado"
-                        type="text"
-                        v-model="buscar_empleado"
-                        @keyup.enter="getEmpleado"
-                        name="buscar_empleado"
-                        ref="buscar_empleado"
-                        id="buscar_empleado"
-                        class="form-control"
-                      />
                     </div>
+
                     <!-- Widget: user widget style 2 -->
-                    <div v-show="mostrar" class="card card-widget widget-user-2">
+                    <div v-show="mostrar_detalles" class="card card-widget widget-user-2">
                       <!-- ---------------------------------------------------------------------------------------------------->
                       <!-- CONDICION DEL COLOR DEL MODAL -->
                       <!-- ---------------------------------------------------------------------------------------------------->
@@ -455,7 +469,7 @@
                               >{{empleado_localidad | capitalize}}</span>
                             </a>
                           </li>
-                          <li class="nav-item">
+                          <li v-if="empleado_supervisor " class="nav-item">
                             <a href="#" class="nav-link">
                               Supervisor
                               <span
@@ -468,7 +482,7 @@
                               Solicitante
                               <span class="description-text float-right">
                                 <Button
-                                  class="btn btn-block btn-outline-primary btn-sm"
+                                  class="btn btn-block btn-outline-primary btn-sm disabled"
                                   type="button"
                                 >{{solicitante | capitalize}}</Button>
                               </span>
@@ -484,37 +498,51 @@
               <div class="modal-footer justify-content-between">
                 <button
                   type="button"
+                  v-show="btn_cerrar"
                   class="btn btn-outline-danger"
                   data-dismiss="modal"
                   @click="modalCierre()"
                 >
                   <i class="fas fa-times-circle"></i> Cerrar
                 </button>
-                <div v-show="salida">
+                <button
+                  type="button"
+                  v-show="btn_procesado"
+                  class="btn btn-success btn-block"
+                  data-dismiss="modal"
+                >
+                  <i class="fas fa-clipboard-check"></i> Esta solicitud ha sido procesada
+                </button>
+                <div>
                   <button
-                    v-show="!mostrar"
-                    type="button"
-                    class="btn btn-outline-primary"
-                    @click.prevent="getEmpleado"
-                  >
-                    <i class="fas fa-search"></i> Buscar
-                  </button>
-                  <button
-                    v-show="is_valido"
+                    v-show="btn_enviar"
                     type="submit"
                     class="btn btn-outline-success"
                     @click.prevent="deleteSalida(empleado_usuario )"
                   >
                     <i class="fas fa-check-circle"></i> Enviar
                   </button>
-                  <button
-                    v-show="is_admin"
-                    type="buttton"
-                    class="btn btn-outline-success"
-                    @click.prevent="postProcesar()"
-                  >
-                    <i class="fas fa-check-circle"></i> Procesar
-                  </button>
+                  <div v-show="is_admin">
+                    <button
+                      v-if="tipoSolicitud==1"
+                      type="button"
+                      v-show="btn_procesar_entrada"
+                      class="btn btn-outline-primary"
+                    >
+                      <i class="fas fa-check-circle"></i> Procesar
+                      <strong>Entrada</strong>
+                    </button>
+                    <button
+                      v-else
+                      v-show="btn_procesar_salidad"
+                      type="button"
+                      class="btn btn-outline-danger"
+                      @click.prevent="procesarSalida(empleado_id )"
+                    >
+                      <i class="fas fa-check-circle"></i> Procesar
+                      <strong>Salida</strong>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -535,10 +563,18 @@ export default {
     return {
       activo: false,
       // Cuando inicia oculta los demas input en el modal Desahucio
-      mostrar: false,
+      mostrar_detalles: false,
       salida: false,
       is_valido: false,
       is_admin: false,
+      btn_procesado: false,
+      // CONTROLES DEL FORMULARIO
+      input_buscar: false,
+      btn_procesar_salidad: false,
+      btn_procesar_entrada: false,
+      btn_cerrar: true,
+      btn_enviar: false,
+      btn_buscar: false,
       //   dynamicValue: false,
       db_solicitudes: {},
       db_empleados: {},
@@ -550,6 +586,7 @@ export default {
       empleado_nombre: null,
       empleado_email: null,
       buscar_empleado: null,
+      empleado_id: null,
       empleado_usuario: null,
       empleado_supervisor: null,
       empleado_departamento: null,
@@ -558,6 +595,7 @@ export default {
       solicitante: null,
       identidad_info: null,
       supervisor_info: null,
+      tipoSolicitud: null,
       form: new Form({
         cedula: "",
         primer_nombre: "",
@@ -607,9 +645,6 @@ export default {
           this.$Progress.fail();
         });
     },
-    postProcesar() {
-      console.log("estas en postProcesar");
-    },
     // ----------------------------------------------------------------------------
     // PETICIONES TIPO - DELETE
     // ----------------------------------------------------------------------------
@@ -629,39 +664,70 @@ export default {
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
-            confirmButtonText: "Si, realizar la solicitud"
+            confirmButtonText: "Si, realizar la solicitud",
+            showLoaderOnConfirm: true,
+            timerProgressBar: true
           })
           .then(result => {
             if (result.value) {
               this.$Progress.start();
               //Envio el request al servidor - backend
-              axios.delete("/deleteSalida/" + empleado_usuario).then(() => {
-                toast.fire({
-                  type: "success",
-                  title: "Solicitud realizada exitosamente"
+              return axios
+                .delete("/deleteSalida/" + empleado_usuario)
+                .then(response => {
+                  Fire.$emit("RecargarData");
+                  toast.fire({
+                    type: "success",
+                    title: "Solicitud realizada exitosamente"
+                  });
+                  this.$Progress.finish();
+                  this.modalCierre();
+                })
+                .catch(error => {
+                  // swal.showValidationMessage(`Request failed: ${error}`);
+                  swal.fire({
+                    icon: "error",
+                    title: "Solicitud existente",
+                    text: "Existe una solicitud vinculada a este empleado",
+                    footer: "Validacion del usuario"
+                  });
                 });
-                this.modalCierre();
-                Fire.$emit("RecargarData");
-                this.$Progress.finish();
-              });
             }
             this.modalCierre();
           });
       }
     },
-
     // VENTANA MODAL - MODAL DE INFORMACION
     Informacion: function(solicitud) {
-      this.mostrar = true;
+      // RESERVADO PARA EL ADMINISTRADOR - CONTROL DESDE EL FRONDEND
       this.is_admin = true;
-      this.is_valido = false;
+
+      //-----------------------------------------------------------
+      this.btn_enviar = false;
+      this.btn_buscar = false;
+      this.mostrar_detalles = true;
+      // Esto le activa el color indicando cuando es de salida o entrada
       if (solicitud.tipo === 1) {
         this.salida = false;
       } else {
         this.salida = true;
       }
+
+      if (solicitud.estado == "Abierto") {
+        this.btn_procesar_salidad = true;
+        this.btn_procesar_entrada = true;
+        this.btn_cerrar = true;
+        this.btn_procesado = false;
+      } else {
+        this.btn_procesar_salidad = false;
+        this.btn_procesar_entrada = false;
+        this.btn_procesado = true;
+        this.btn_cerrar = false;
+      }
+
       this.modalDetalles();
 
+      this.empleado_id = solicitud.id;
       // NOMBRE COMPLETO
       this.empleado_nombre = solicitud.nombre_completo;
       // IDENTIDAD
@@ -678,6 +744,8 @@ export default {
       this.empleado_supervisor = solicitud.supervisor;
       // SOLICITANTE
       this.solicitante = solicitud.solicitante_nombre;
+
+      this.tipoSolicitud = solicitud.tipo;
 
       // axios.get("/infoSolicitud/" + solicitud.id).then(response => {
       //   this.nombre_completo =
@@ -713,10 +781,28 @@ export default {
     // ----------------------------------------------------------------------------
     // PETICIONES AL ACTIVE DIRECTORY
     // ----------------------------------------------------------------------------
+    procesarSalida(empleado_id) {
+      let buscar = empleado_id;
+      this.$Progress.start();
+      axios.delete("/procesarSalida/" + buscar).then(Response => {
+        Fire.$emit("RecargarData");
+        toast.fire({
+          type: "success",
+          title: "Solicitud realizada exitosamente"
+        });
+        this.$Progress.finish();
+        $("#modal-detalles").modal("hide");
+      });
+    },
+
     getEmpleado() {
-      this.salida = true;
-      this.mostrar = false;
-      this.detalles = true;
+      this.input_buscar = true;
+      this.btn_buscar = true;
+      this.btn_cerrar = true;
+      this.mostrar_detalles = false;
+      this.btn_procesar_salidad = false;
+      this.btn_procesar_entrada = false;
+      this.btn_procesado = false;
       this.modalDetalles();
 
       if (this.buscar_empleado != null) {
@@ -726,7 +812,9 @@ export default {
           .then(response => {
             this.$Progress.start();
             // console.log((this.db_empleados = response.data.description));
-            this.mostrar = true;
+            this.btn_buscar = false;
+            this.btn_enviar = true;
+            this.mostrar_detalles = true;
             this.is_valido = true;
             this.db_empleados = response.data;
             // NOMBRES COMPLEETO
@@ -744,8 +832,14 @@ export default {
             this.empleado_supervisor = response.data.manager;
             this.$Progress.finish();
           })
-          .catch(e => {
-            console.log(e);
+          .catch(error => {
+            // swal.showValidationMessage(`Request failed: ${error}`);
+            swal.fire({
+              icon: "error",
+              title: "USUARIO NO EXISTENTE!",
+              text: "Verifique el dato introducido",
+              footer: "<a href>Validacion del usuario?</a>"
+            });
           });
       }
     },

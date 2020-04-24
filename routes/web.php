@@ -38,6 +38,7 @@ Route::get('/getLocalidad', 'SolicitudController@getLocalidad')->name('getLocali
 Route::get('/getEmpleado', 'SolicitudController@getEmpleado')->name('getEmpleado');
 
 Route::delete('/deleteSalida/{id}', 'SolicitudController@deleteSalida')->name('deleteSalida');
+Route::delete('/procesarSalida/{id}', 'SolicitudController@procesarSalida')->name('procesarSalida');
 
 
 

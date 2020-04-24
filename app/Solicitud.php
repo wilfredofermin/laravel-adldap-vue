@@ -28,4 +28,6 @@ class Solicitud extends Model
         'created_at',
         'updated_at'
     ];
+
+    // protected $primaryKey = 'identidad';
 }

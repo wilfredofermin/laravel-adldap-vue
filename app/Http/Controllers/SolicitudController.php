@@ -92,7 +92,7 @@ class SolicitudController extends Controller
             
         ]);    
 
-            // try {
+            try {
                
             // ------------------------------------------------------
             // SERVICESKIT
@@ -187,11 +187,11 @@ class SolicitudController extends Controller
                 ]);
 
 
-        // } catch (\Exception $e) {
+         } catch (\Exception $e) {
 
-        //     return 'No se pudo completar';
+            return 'No se pudo completar';
             
-        //     }
+         }
 
     }
 
@@ -285,6 +285,7 @@ class SolicitudController extends Controller
     public function postSalida(Request $request)
     {   
             // CONVERTIMOS LOS VALORES PARA PODER INCLUIRLO EN EL FORMULARIO
+
             $usuario =  $request['salida_usuario'];
             $nombrecompleto = $request['salida_Nombres'];
             $puesto = $request['salida_puesto'];
@@ -357,10 +358,153 @@ class SolicitudController extends Controller
         // return 'ok';
     }
 
+    public function procesarSalida($id){
+
+
+        $empleado = Solicitud::find($id);
+
+        $empleado_id = $empleado ->id;
+        $username = $empleado ->identidad;
+        $serviceskit_id = $empleado ->serviceskit;
+
+
+        // ACCION EN ACTIVE DIRECTORY
+        $salida = Adldap::search()->findByOrFail('samaccountname',$username);  
+        //Cambio el estado
+        $salida->updateAttribute('useraccountcontrol','514');
+        //Denegamos el acceso
+        $salida->updateAttribute('logonhours',"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00");
+        //Lo muevo a la OU correspondiente
+        $newParentOu = Adldap::search()->ous()->find('Disabled Accounts');
+        $salida->move($newParentOu);
+        //Actualizamos
+        $salida ->update();
+
+        // ACTUALIZAR EL SERVICESKIT
+            // Url base
+            $Urs ='http://servicekit.viva.com.do/servlets/RequestServlet?';
+     
+            // Parametros
+                    $query =[
+
+                // Referencia : https://www.manageengine.com/products/service-desk-msp/help/adminguide/api/request-attributes.html
+
+                                'workOrderID' => $serviceskit_id,
+                                'operation' => 'UpdateRequest', 
+
+                                // USURIOS DE ACCESO AL SISTEMA
+                                'username' => env('SERVICESKIT_USERNAME'),
+                                'password' => env('SERVICESKIT_PASSWORD'),
+                                // -------------------
+                                'resolution' =>'Se han removidos todos los acceso del usuario - Esta operacion ha sido realizada por systm admin - viva ',
+                                //  DATOS A COMPLETAR POR EL FORMULARIO   
+                               'status' => 'Closed',
+                                // 'technician' => 'sti', //--> Si coloco como tecnico STI esta ira intercambiando las solicitudes a los tecnicos disponnibles
+                                'technician' => Auth::user()->username,
+                            ];
+                               // AQUI OPTENEMOS LA RESPUESTA RECIBIDA DEL SERVIDOR - SERVICESKT
+                             $response = (Http::retry(3, 100)->get($Urs, $query));
+
+                // ACCION EN LA BASE DE DATOS
+                    $empleado ->update([
+                            'prioridad' =>'Normal',
+                            'modificado_por' => Auth::user()->username , 
+                            'estado' => 'cerrado' 
+                            ]);
+
+
+
+        
+        // dd($userAD->getAttributes());
+    }    
+
 
     public function test()
     {
         
+        //  $empleado = Solicitud::find('wfermin');
+        //  dd($empleado);
+
+        $empleado_actualizar = Solicitud::find(15);
+
+        dd($empleado_actualizar ->identidad);
+
+
+        //  $empleado = Solicitud::find($id);
+
+        // $empleado_id = $empleado ->id;
+        // $username = $empleado ->username;
+
+        // DESACTIVAR USUARIO ---------------------------------------------------------------------------->
+        //  $empleado = Adldap::search()->findByOrFail('samaccountname','wfermin');  
+        // //Cambio el estado
+        // $empleado->updateAttribute('useraccountcontrol','514');
+        // //Denegamos el acceso
+        // $empleado->updateAttribute('logonhours',"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00");
+        // //Lo muevo a la OU correspondiente
+        // $newParentOu = Adldap::search()->ous()->find('Disabled Accounts');
+        // $empleado->move($newParentOu);
+        // //Actualizamos
+        // $empleado ->update();
+        // dd($empleado);
+         // DESACTIVAR USUARIO ---------------------------------------------------------------------------->
+
+
+         // MANEJO DE GRUPOS   ---------------------------------------------------------------------------->
+
+         // Adldap\Models\Group
+            // $group = $provider->make()->group([
+            //     'cn' => 'Managers',
+            // ]);
+
+            // // Create group's DN through the DN Builder:
+            // $group = $provider->make()->group();
+
+            // $dn = $group->getDnBuilder();
+
+            // $dn->addOu('Workstation Computers');
+
+            // $dn->addCn("Managers");
+
+            // $group->setDn($dn);
+
+            // // Or set the DN manually:
+            // $ou->setDn('cn=Managers,ou=Workstation Computers,dc=test,dc=local,dc=com');
+
+            // $group->save();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // dd($empleado->getAttributes());
 
             // ACTIVE DIRECTORY FUNCIONALIDADES
 
